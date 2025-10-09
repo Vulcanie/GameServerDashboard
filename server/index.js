@@ -6,13 +6,14 @@ import { Server as IOServer } from "socket.io";
 import path from "path";
 import apiRouter from "../routes/api.js";
 import { pollServers } from "../services/pollingService.js";
-
-const app = express();
 app.use(
 	cors({
 		origin: "https://vulcanie.github.io",
 	}),
 );
+
+const app = express();
+
 const server = http.createServer(app);
 const io = new IOServer(server, {
 	cors: {

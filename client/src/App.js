@@ -28,6 +28,7 @@ function App() {
 		// Build API base from environment variable if provided. In production
 		// you should set REACT_APP_API_URL to your backend (e.g. https://api.example.com)
 		const API_BASE = process.env.REACT_APP_API_URL || "";
+		console.log("Using API base:", API_BASE);
 
 		function joinUrl(base, path) {
 			if (!base) return path;
