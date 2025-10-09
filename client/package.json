@@ -28,6 +28,7 @@
 		"deploy": "gh-pages -d build",
 		"deploy:prod": "cross-env REACT_APP_API_URL=\"https://your-backend.example.com\" npm run deploy"
 	},
+	"proxy": "http://localhost:3001",
 	"eslintConfig": {
 		"extends": [
 			"react-app",
@@ -47,7 +48,7 @@
 		]
 	},
 	"devDependencies": {
-		"gh-pages": "^6.3.0",
-		"cross-env": "^7.0.3"
+		"cross-env": "^7.0.3",
+		"gh-pages": "^6.3.0"
 	}
 }
