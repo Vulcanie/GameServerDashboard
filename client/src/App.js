@@ -37,14 +37,19 @@ function App() {
 
 		const fetchData = async () => {
 			try {
-				// Fetch data from the backend API. When REACT_APP_API_URL is empty
-				// this falls back to a relative request (good for local dev with a proxy).
 				const url = joinUrl(API_BASE, "/api/status");
 				const res = await fetch(url);
+
+				// ✅ Check if response is JSON before parsing
+				const contentType = res.headers.get("content-type");
+				if (!contentType || !contentType.includes("application/json")) {
+					throw new Error("Invalid response format: not JSON");
+				}
+
 				if (!res.ok) {
-					// Non-2xx response
 					throw new Error(`HTTP ${res.status} ${res.statusText}`);
 				}
+
 				const data = await res.json();
 				setServers(data);
 				setApiError(null);
