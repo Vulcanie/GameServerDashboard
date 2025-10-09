@@ -7,8 +7,9 @@ import { serverStatus } from "../services/pollingService.js";
 
 const router = express.Router();
 
-// This route provides the live status of all servers.
+// ✅ This route provides the live status of all servers.
 router.get("/status", (req, res) => {
+	res.setHeader("Content-Type", "application/json");
 	res.json(serverStatus);
 });
 
@@ -108,11 +109,9 @@ router.post("/control/:serverName/:action", async (req, res) => {
 		exec(command, options, (error, stdout, stderr) => {
 			if (error) {
 				console.error(`Exec error for ${serverName}:`, error);
-				return res
-					.status(500)
-					.json({
-						error: `Failed to execute start script: ${error.message}`,
-					});
+				return res.status(500).json({
+					error: `Failed to execute start script: ${error.message}`,
+				});
 			}
 			res.json({
 				success: true,
@@ -148,11 +147,9 @@ router.post("/control/:serverName/:action", async (req, res) => {
 			exec(command, (error, stdout, stderr) => {
 				if (error && !stderr.includes("not found")) {
 					console.error(`Taskkill error for ${serverName}:`, error);
-					return res
-						.status(500)
-						.json({
-							error: `Failed to stop server: ${error.message}`,
-						});
+					return res.status(500).json({
+						error: `Failed to stop server: ${error.message}`,
+					});
 				}
 				res.json({
 					success: true,
