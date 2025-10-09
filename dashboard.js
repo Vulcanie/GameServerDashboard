@@ -1,25 +1,19 @@
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
-import path from "path";
-import { fileURLToPath } from "url";
-import open from "open";
 import apiRoutes from "./routes/api.js";
 import { pollServers } from "./services/pollingService.js";
 
 // Basic server setup
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-	cors: { origin: "*" },
+	cors: { origin: "https://vulcanie.github.io" }, // Allow GitHub Pages frontend
 });
 const PORT = process.env.PORT || 8080;
 
 // Middleware
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "client", "build")));
 
 // API routes
 app.use("/api", apiRoutes);
@@ -32,13 +26,9 @@ io.on("connection", (socket) => {
 
 // Start the server
 server.listen(PORT, "0.0.0.0", () => {
-	const url = `http://localhost:${PORT}`;
-	console.log(`✅ Dashboard running on ${url}`);
+	console.log(`✅ Dashboard API running on http://50.82.40.123:${PORT}`);
 
 	// Initial poll, then start the interval.
 	pollServers(io);
 	setInterval(() => pollServers(io), 5000);
-
-	// Open the dashboard in the default browser
-	open(url);
 });

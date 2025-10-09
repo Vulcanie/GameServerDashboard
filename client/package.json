@@ -26,9 +26,8 @@
 		"eject": "react-scripts eject",
 		"predeploy": "npm run build",
 		"deploy": "gh-pages -d build",
-		"deploy:prod": "cross-env REACT_APP_API_URL=\"https://your-backend.example.com\" npm run deploy"
+		"deploy:prod": "cross-env REACT_APP_API_URL=\"http://50.82.40.123:3001\" npm run deploy"
 	},
-	"proxy": "http://localhost:3001",
 	"eslintConfig": {
 		"extends": [
 			"react-app",

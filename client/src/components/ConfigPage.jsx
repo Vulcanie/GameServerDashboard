@@ -12,7 +12,6 @@ import { ArrowBack as ArrowBackIcon } from "@mui/icons-material";
 import { grey } from "@mui/material/colors";
 import StatusDisplay from "./StatusDisplay";
 
-// This component displays the detailed configuration page for a single server.
 function ConfigPage({ serverName, serverStatus, onBack }) {
 	const [serverInfo, setServerInfo] = React.useState(null);
 	const [configs, setConfigs] = React.useState({});
@@ -20,22 +19,24 @@ function ConfigPage({ serverName, serverStatus, onBack }) {
 	const [message, setMessage] = React.useState("");
 	const [loading, setLoading] = React.useState(true);
 
-	// This effect fetches the server's static info (like config names) when the page loads.
+	const API_BASE = process.env.REACT_APP_API_URL || "";
+
 	React.useEffect(() => {
 		const fetchServerInfo = async () => {
 			try {
 				setLoading(true);
-				const infoRes = await fetch(`/api/server/${serverName}`);
+				const infoRes = await fetch(
+					`${API_BASE}/api/server/${serverName}`,
+				);
 				if (!infoRes.ok) throw new Error("Failed to fetch server info");
 				const infoData = await infoRes.json();
 				setServerInfo(infoData);
 
-				// If the server has config files, fetch the content for each one.
 				if (infoData.configNames && infoData.configNames.length > 0) {
 					const newConfigs = {};
 					for (const name of infoData.configNames) {
 						const configRes = await fetch(
-							`/api/config/${serverName}?file=${name}`,
+							`${API_BASE}/api/config/${serverName}?file=${name}`,
 						);
 						const configData = await configRes.json();
 						newConfigs[name] =
@@ -59,13 +60,12 @@ function ConfigPage({ serverName, serverStatus, onBack }) {
 		setActiveTab(newValue);
 	};
 
-	// Function to handle saving the currently visible config file.
 	const handleSave = async () => {
 		const activeConfigName = serverInfo.configNames[activeTab];
 		const activeConfigContent = configs[activeConfigName];
 		setMessage(`Saving ${activeConfigName}...`);
 		try {
-			const res = await fetch(`/api/config/${serverName}`, {
+			const res = await fetch(`${API_BASE}/api/config/${serverName}`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
@@ -80,13 +80,15 @@ function ConfigPage({ serverName, serverStatus, onBack }) {
 		}
 	};
 
-	// Function to handle sending start/stop commands.
 	const handleControl = async (action) => {
 		setMessage(`Sending ${action} command...`);
 		try {
-			const res = await fetch(`/api/control/${serverName}/${action}`, {
-				method: "POST",
-			});
+			const res = await fetch(
+				`${API_BASE}/api/control/${serverName}/${action}`,
+				{
+					method: "POST",
+				},
+			);
 			const data = await res.json();
 			setMessage(data.message || data.error);
 		} catch (err) {
