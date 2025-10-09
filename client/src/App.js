@@ -18,20 +18,39 @@ function App() {
 	const [selectedServer, setSelectedServer] = React.useState(null);
 	// State to hold the live data for all servers
 	const [servers, setServers] = React.useState({});
+	// Any API error (used to show a helpful message in the UI)
+	const [apiError, setApiError] = React.useState(null);
 	// State to show a loading spinner on the first load
 	const [loading, setLoading] = React.useState(true);
 
 	// This effect runs once to fetch data continuously
 	React.useEffect(() => {
+		// Build API base from environment variable if provided. In production
+		// you should set REACT_APP_API_URL to your backend (e.g. https://api.example.com)
+		const API_BASE = process.env.REACT_APP_API_URL || "";
+
+		function joinUrl(base, path) {
+			if (!base) return path;
+			return base.replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
+		}
+
 		const fetchData = async () => {
 			try {
-				// Fetch data from the local backend API
-				const res = await fetch("/api/status");
+				// Fetch data from the backend API. When REACT_APP_API_URL is empty
+				// this falls back to a relative request (good for local dev with a proxy).
+				const url = joinUrl(API_BASE, "/api/status");
+				const res = await fetch(url);
+				if (!res.ok) {
+					// Non-2xx response
+					throw new Error(`HTTP ${res.status} ${res.statusText}`);
+				}
 				const data = await res.json();
 				setServers(data);
+				setApiError(null);
 			} catch (err) {
 				console.error("Error fetching data:", err);
 				setServers({});
+				setApiError(err.message || String(err));
 			} finally {
 				setLoading(false);
 			}
@@ -70,6 +89,7 @@ function App() {
 						servers={servers}
 						loading={loading}
 						onNavigate={navigateToConfig}
+						apiError={apiError}
 					/>
 				) : (
 					<ConfigPage
