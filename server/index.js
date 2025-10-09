@@ -11,12 +11,18 @@ const app = express();
 const server = http.createServer(app);
 const io = new IOServer(server, {
 	cors: {
-		origin: process.env.CORS_ORIGIN || true,
+		origin: process.env.CORS_ORIGIN || "https://vulcanie.github.io",
 		methods: ["GET", "POST"],
 	},
 });
 
-app.use(cors());
+// Enable CORS for GitHub Pages
+app.use(
+	cors({
+		origin: "https://vulcanie.github.io",
+	}),
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -26,15 +32,11 @@ app.use("/api", apiRouter);
 // Simple API key middleware: if API_KEY is set in env, require it for write
 // operations (non-GET) under sensitive routes.
 function requireApiKeyForWrites(req, res, next) {
-	// Allow safe reads
 	if (req.method === "GET") return next();
 
 	const apiKey = process.env.API_KEY;
-	// If no API_KEY is configured, don't enforce (useful for local/dev).
 	if (!apiKey) return next();
 
-	// Accept the key via header 'x-api-key', query param 'api_key', or
-	// Authorization: Bearer <key>
 	const provided = (
 		req.headers["x-api-key"] ||
 		req.query.api_key ||
@@ -87,10 +89,12 @@ async function startPolling() {
 	);
 }
 
+// Bind to 0.0.0.0 to allow external access
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, () => {
-	console.log(`API server listening on http://localhost:${PORT}`);
+server.listen(PORT, "0.0.0.0", () => {
+	console.log(`API server listening on http://50.82.40.123:${PORT}`);
 	startPolling();
 });
 
+// Reminder: Update your frontend to use http://50.82.40.123:3001/api/...
 export default server;
