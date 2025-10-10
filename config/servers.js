@@ -106,9 +106,7 @@ export const SERVERS_TO_QUERY = [
 		host: "127.0.0.1",
 		port: 7777,
 		sessionName: "GodlyHeroes",
-		serverPassword: "4Honor",
-		configPath:
-			"C:/Users/vulca/Desktop/Valheim/steamapps/common/Valheim dedicated server/valheim.conf", // Example path
+		serverPassword: "4Honor", // Example path
 		startScriptPath:
 			"C:/Users/vulca/Desktop/Valheim/steamapps/common/Valheim dedicated server/Valheim-Server-Start.bat",
 		workingDir:
