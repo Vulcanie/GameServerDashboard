@@ -1,16 +1,4 @@
-import React from "react";
-import {
-	Box,
-	Typography,
-	Button,
-	CircularProgress,
-	Tabs,
-	Tab,
-	TextareaAutosize,
-} from "@mui/material";
-import { ArrowBack as ArrowBackIcon } from "@mui/icons-material";
-import { grey } from "@mui/material/colors";
-import StatusDisplay from "./StatusDisplay";
+// ...imports remain unchanged
 
 function ConfigPage({ serverName, serverStatus, onBack, userRole }) {
 	const [serverInfo, setServerInfo] = React.useState(null);
@@ -26,7 +14,7 @@ function ConfigPage({ serverName, serverStatus, onBack, userRole }) {
 			try {
 				setLoading(true);
 				const infoRes = await fetch(
-					`${API_BASE}/api/server/${serverName}?=${Date.now()}`,
+					`${API_BASE}/api/server/${serverName}?t=${Date.now()}`,
 					{
 						headers: {
 							Accept: "application/json",
@@ -131,6 +119,54 @@ function ConfigPage({ serverName, serverStatus, onBack, userRole }) {
 		);
 	}
 
+	// ✅ Handle servers with no config files
+	if (!loading && serverInfo?.configNames?.length === 0) {
+		return (
+			<Box sx={{ mt: 4 }}>
+				<Button
+					startIcon={<ArrowBackIcon />}
+					onClick={onBack}
+					sx={{ mb: 2 }}
+				>
+					Back to Dashboard
+				</Button>
+				<Typography variant="h5" color="info.main">
+					This server does not have any editable config files.
+				</Typography>
+				<Box sx={{ mt: 3 }}>
+					<Button
+						variant="contained"
+						color="success"
+						onClick={() => handleControl("start")}
+						sx={{ mr: 2 }}
+					>
+						Start Server
+					</Button>
+					<Button
+						variant="contained"
+						color="error"
+						onClick={() => handleControl("stop")}
+					>
+						Stop Server
+					</Button>
+					{message && (
+						<Typography
+							variant="body2"
+							sx={{
+								color: grey[400],
+								mt: 2,
+								fontStyle: "italic",
+							}}
+						>
+							Status: {message}
+						</Typography>
+					)}
+				</Box>
+				<StatusDisplay serverStatus={serverStatus} />
+			</Box>
+		);
+	}
+
 	return (
 		<Box sx={{ pb: "120px" }}>
 			<Button
@@ -198,22 +234,15 @@ function ConfigPage({ serverName, serverStatus, onBack, userRole }) {
 				<CircularProgress />
 			) : (
 				<>
-					{serverInfo &&
-						serverInfo.configNames &&
-						serverInfo.configNames.length > 1 && (
-							<Box
-								sx={{ borderBottom: 1, borderColor: "divider" }}
-							>
-								<Tabs
-									value={activeTab}
-									onChange={handleTabChange}
-								>
-									{serverInfo.configNames.map((name) => (
-										<Tab label={name} key={name} />
-									))}
-								</Tabs>
-							</Box>
-						)}
+					{serverInfo?.configNames?.length > 1 && (
+						<Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+							<Tabs value={activeTab} onChange={handleTabChange}>
+								{serverInfo.configNames.map((name) => (
+									<Tab label={name} key={name} />
+								))}
+							</Tabs>
+						</Box>
+					)}
 					<TextareaAutosize
 						value={configs[currentConfigName] || ""}
 						onChange={(e) =>
