@@ -19,7 +19,11 @@ function ConfigPage({ serverName, serverStatus, onBack, userRole }) {
 	const [message, setMessage] = React.useState("");
 	const [loading, setLoading] = React.useState(true);
 
-	const API_BASE = process.env.REACT_APP_API_URL || "";
+	// ✅ Centralized and sanitized API base
+	const API_BASE =
+		process.env.REACT_APP_API_URL?.trim().replace(/\/+$/, "") || "";
+	const joinUrl = (base, path) =>
+		`${base}/${path}`.replace(/\/+/g, "/").replace(":/", "://");
 
 	React.useEffect(() => {
 		const fetchServerInfo = async () => {
@@ -42,7 +46,10 @@ function ConfigPage({ serverName, serverStatus, onBack, userRole }) {
 					const newConfigs = {};
 					for (const name of infoData.configNames) {
 						const configRes = await fetch(
-							`${API_BASE}/api/config/${serverName}?file=${name}&t=${Date.now()}`,
+							joinUrl(
+								API_BASE,
+								`/api/config/${serverName}?file=${name}&t=${Date.now()}`,
+							),
 							{
 								headers: {
 									Accept: "application/json",
@@ -80,14 +87,20 @@ function ConfigPage({ serverName, serverStatus, onBack, userRole }) {
 		const activeConfigContent = configs[activeConfigName];
 		setMessage(`Saving ${activeConfigName}...`);
 		try {
-			const res = await fetch(`${API_BASE}/api/config/${serverName}`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					fileName: activeConfigName,
-					content: activeConfigContent,
-				}),
-			});
+			const res = await fetch(
+				joinUrl(API_BASE, `/api/config/${serverName}`),
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						"ngrok-skip-browser-warning": "true",
+					},
+					body: JSON.stringify({
+						fileName: activeConfigName,
+						content: activeConfigContent,
+					}),
+				},
+			);
 			const data = await res.json();
 			setMessage(data.message || data.error);
 		} catch (err) {
@@ -99,9 +112,12 @@ function ConfigPage({ serverName, serverStatus, onBack, userRole }) {
 		setMessage(`Sending ${action} command...`);
 		try {
 			const res = await fetch(
-				`${API_BASE}/api/control/${serverName}/${action}`,
+				joinUrl(API_BASE, `/api/control/${serverName}/${action}`),
 				{
 					method: "POST",
+					headers: {
+						"ngrok-skip-browser-warning": "true",
+					},
 				},
 			);
 			const data = await res.json();
