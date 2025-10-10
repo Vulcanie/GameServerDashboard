@@ -8,6 +8,7 @@ import {
 import { darkTheme } from "./theme";
 import DashboardPage from "./components/DashboardPage";
 import ConfigPage from "./components/ConfigPage";
+import LoginPage from "./components/LoginPage";
 
 function App() {
 	const [page, setPage] = React.useState("dashboard");
