@@ -27,6 +27,12 @@ function ConfigPage({ serverName, serverStatus, onBack, userRole }) {
 				setLoading(true);
 				const infoRes = await fetch(
 					`${API_BASE}/api/server/${serverName}`,
+					{
+						headers: {
+							Accept: "application/json",
+							"ngrok-skip-browser-warning": "true",
+						},
+					},
 				);
 				if (!infoRes.ok) throw new Error("Failed to fetch server info");
 				const infoData = await infoRes.json();
@@ -37,6 +43,12 @@ function ConfigPage({ serverName, serverStatus, onBack, userRole }) {
 					for (const name of infoData.configNames) {
 						const configRes = await fetch(
 							`${API_BASE}/api/config/${serverName}?file=${name}`,
+							{
+								headers: {
+									Accept: "application/json",
+									"ngrok-skip-browser-warning": "true",
+								},
+							},
 						);
 						const configData = await configRes.json();
 						newConfigs[name] =
