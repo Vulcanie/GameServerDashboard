@@ -16,7 +16,9 @@ function App() {
 	const [servers, setServers] = React.useState({});
 	const [apiError, setApiError] = React.useState(null);
 	const [loading, setLoading] = React.useState(true);
-	const [userRole, setUserRole] = React.useState(null); // New state for user role
+	const [userRole, setUserRole] = React.useState(() => {
+		return localStorage.getItem("userRole") || null;
+	});
 
 	React.useEffect(() => {
 		const API_BASE = process.env.REACT_APP_API_URL || "";
@@ -89,7 +91,12 @@ function App() {
 		return (
 			<ThemeProvider theme={darkTheme}>
 				<CssBaseline />
-				<LoginPage onLogin={(role) => setUserRole(role)} />
+				<LoginPage
+					onLogin={(role) => {
+						setUserRole(role);
+						localStorage.setItem("userRole", role);
+					}}
+				/>
 			</ThemeProvider>
 		);
 	}
