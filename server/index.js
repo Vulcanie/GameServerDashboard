@@ -9,6 +9,12 @@ import { pollServers } from "../services/pollingService.js";
 
 const app = express();
 
+// ✅ Log every incoming request
+app.use((req, res, next) => {
+	console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+	next();
+});
+
 app.use(
 	cors({
 		origin: "https://vulcanie.github.io",
@@ -63,6 +69,12 @@ if (process.env.SERVE_STATIC === "1") {
 		res.sendFile(path.join(buildPath, "index.html"));
 	});
 }
+
+// ✅ Catch-all for unhandled API routes
+app.use("/api/*", (req, res) => {
+	console.warn("Unhandled API route:", req.method, req.originalUrl);
+	res.status(404).json({ error: "API route not found" });
+});
 
 io.on("connection", (socket) => {
 	console.log("socket connected:", socket.id);
