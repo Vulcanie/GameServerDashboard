@@ -28,7 +28,11 @@ function App() {
 		const fetchData = async () => {
 			try {
 				const url = joinUrl(API_BASE, "/api/status");
-				const res = await fetch(url);
+				const res = await fetch(url, {
+					headers: {
+						Accept: "application/json",
+					},
+				});
 
 				const contentType = res.headers.get("content-type");
 				if (!contentType?.includes("application/json")) {
