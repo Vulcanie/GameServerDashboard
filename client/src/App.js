@@ -45,8 +45,16 @@ function App() {
 					throw new Error(`HTTP ${res.status} ${res.statusText}`);
 				}
 
-				const data = await res.json();
+				let data;
+				try {
+					data = await res.json();
+				} catch (parseErr) {
+					const raw = await res.text();
+					console.error("Failed to parse JSON. Raw response:", raw);
+					throw new Error("Invalid JSON response");
+				}
 				setServers(data);
+
 				setApiError(null);
 			} catch (err) {
 				console.error("Error fetching data:", err);
