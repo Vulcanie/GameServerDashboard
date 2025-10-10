@@ -31,6 +31,7 @@ function App() {
 				const res = await fetch(url, {
 					headers: {
 						Accept: "application/json",
+						"ngrok-skip-browser-warning": "true",
 					},
 				});
 
