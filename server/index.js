@@ -23,21 +23,13 @@ const io = new IOServer(server, {
 	},
 });
 
-// Enable CORS for GitHub Pages
-app.use(
-	cors({
-		origin: "https://vulcanie.github.io",
-	}),
-);
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Mount API under /api
+// ✅ Mount API routes first
 app.use("/api", apiRouter);
 
-// Simple API key middleware: if API_KEY is set in env, require it for write
-// operations (non-GET) under sensitive routes.
+// ✅ API key middleware for write protection
 function requireApiKeyForWrites(req, res, next) {
 	if (req.method === "GET") return next();
 
@@ -57,17 +49,19 @@ function requireApiKeyForWrites(req, res, next) {
 		.json({ error: "Unauthorized: invalid or missing API key" });
 }
 
-// Protect config and control endpoints for write operations
 app.use("/api/config", requireApiKeyForWrites);
 app.use("/api/control", requireApiKeyForWrites);
 
-// Optionally serve the built client (if you want the server to host the frontend)
+// ✅ Serve static frontend only if enabled
 if (process.env.SERVE_STATIC === "1") {
 	const buildPath = path.resolve("../client/build");
 	app.use(express.static(buildPath));
-	app.get("*", (req, res) =>
-		res.sendFile(path.join(buildPath, "index.html")),
-	);
+
+	// ✅ Guard fallback route to avoid hijacking /api/*
+	app.get("*", (req, res, next) => {
+		if (req.path.startsWith("/api")) return next();
+		res.sendFile(path.join(buildPath, "index.html"));
+	});
 }
 
 io.on("connection", (socket) => {
@@ -96,12 +90,10 @@ async function startPolling() {
 	);
 }
 
-// Bind to 0.0.0.0 to allow external access
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, "0.0.0.0", () => {
-	console.log(`API server listening on http://50.82.40.123:${PORT}`);
+	console.log(`API server listening on http://0.0.0.0:${PORT}`);
 	startPolling();
 });
 
-// Reminder: Update your frontend to use http://50.82.40.123:3001/api/...
 export default server;
