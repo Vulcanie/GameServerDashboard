@@ -26,7 +26,7 @@ function ConfigPage({ serverName, serverStatus, onBack, userRole }) {
 			try {
 				setLoading(true);
 				const infoRes = await fetch(
-					`${API_BASE}/api/server/${serverName}`,
+					`${API_BASE}/api/server/${serverName}?=${Date.now()}`,
 					{
 						headers: {
 							Accept: "application/json",
@@ -42,7 +42,7 @@ function ConfigPage({ serverName, serverStatus, onBack, userRole }) {
 					const newConfigs = {};
 					for (const name of infoData.configNames) {
 						const configRes = await fetch(
-							`${API_BASE}/api/config/${serverName}?file=${name}`,
+							`${API_BASE}/api/config/${serverName}?file=${name}&t=${Date.now()}`,
 							{
 								headers: {
 									Accept: "application/json",
