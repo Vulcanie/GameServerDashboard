@@ -1,4 +1,16 @@
-// ...imports remain unchanged
+import React from "react";
+import {
+	Box,
+	Typography,
+	Button,
+	CircularProgress,
+	Tabs,
+	Tab,
+	TextareaAutosize,
+} from "@mui/material";
+import { ArrowBack as ArrowBackIcon } from "@mui/icons-material";
+import { grey } from "@mui/material/colors";
+import StatusDisplay from "./StatusDisplay";
 
 function ConfigPage({ serverName, serverStatus, onBack, userRole }) {
 	const [serverInfo, setServerInfo] = React.useState(null);
