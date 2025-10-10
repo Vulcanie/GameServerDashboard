@@ -12,12 +12,17 @@ const app = express();
 // ✅ Log every incoming request
 app.use((req, res, next) => {
 	console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+	if (req.headers["ngrok-skip-browser-warning"]) {
+		res.setHeader("ngrok-skip-browser-warning", "true");
+	}
 	next();
 });
 
 app.use(
 	cors({
-		origin: "https://vulcanie.github.io",
+		origin: "*",
+		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+		allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
 	}),
 );
 

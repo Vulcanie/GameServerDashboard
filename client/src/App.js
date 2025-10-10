@@ -10,6 +10,11 @@ import DashboardPage from "./components/DashboardPage";
 import ConfigPage from "./components/ConfigPage";
 import LoginPage from "./components/LoginPage";
 
+// ✅ Centralized API base URL
+const API_BASE =
+	process.env.REACT_APP_API_URL?.trim().replace(/\/+$/, "") || "";
+console.log("🌐 Using API base:", API_BASE || "(relative)");
+
 function App() {
 	const [page, setPage] = React.useState("dashboard");
 	const [selectedServer, setSelectedServer] = React.useState(null);
@@ -21,13 +26,8 @@ function App() {
 	});
 
 	React.useEffect(() => {
-		const API_BASE = process.env.REACT_APP_API_URL || "";
-		console.log("Using API base:", API_BASE);
-
-		function joinUrl(base, path) {
-			if (!base) return path;
-			return base.replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
-		}
+		const joinUrl = (base, path) =>
+			`${base}/${path}`.replace(/\/+/g, "/").replace(":/", "://");
 
 		const fetchData = async () => {
 			try {
@@ -59,7 +59,6 @@ function App() {
 					throw new Error("Invalid JSON response");
 				}
 				setServers(data);
-
 				setApiError(null);
 			} catch (err) {
 				console.error("Error fetching data:", err);

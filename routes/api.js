@@ -7,13 +7,21 @@ import { serverStatus } from "../services/pollingService.js";
 
 const router = express.Router();
 
-// ✅ This route provides the live status of all servers.
+// ✅ Middleware to handle ngrok browser warning header
+router.use((req, res, next) => {
+	if (req.headers["ngrok-skip-browser-warning"]) {
+		res.setHeader("ngrok-skip-browser-warning", "true");
+	}
+	next();
+});
+
+// ✅ Live status of all servers
 router.get("/status", (req, res) => {
 	res.setHeader("Content-Type", "application/json");
 	res.json(serverStatus);
 });
 
-// This route provides basic info about a single server for the config page.
+// ✅ Basic info about a single server
 router.get("/server/:serverName", (req, res) => {
 	const server = SERVERS_TO_QUERY.find(
 		(s) => s.name === req.params.serverName,
@@ -32,7 +40,7 @@ router.get("/server/:serverName", (req, res) => {
 	});
 });
 
-// This route gets the content of a specific config file.
+// ✅ Get content of a specific config file
 router.get("/config/:serverName", async (req, res) => {
 	const server = SERVERS_TO_QUERY.find(
 		(s) => s.name === req.params.serverName,
@@ -61,7 +69,7 @@ router.get("/config/:serverName", async (req, res) => {
 	}
 });
 
-// This route saves a config file.
+// ✅ Save a config file
 router.post("/config/:serverName", async (req, res) => {
 	const server = SERVERS_TO_QUERY.find(
 		(s) => s.name === req.params.serverName,
@@ -90,7 +98,7 @@ router.post("/config/:serverName", async (req, res) => {
 	}
 });
 
-// This route starts and stops servers.
+// ✅ Start or stop a server
 router.post("/control/:serverName/:action", async (req, res) => {
 	const { serverName, action } = req.params;
 	const server = SERVERS_TO_QUERY.find((s) => s.name === serverName);
