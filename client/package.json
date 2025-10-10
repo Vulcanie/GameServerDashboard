@@ -26,7 +26,9 @@
 		"eject": "react-scripts eject",
 		"predeploy": "npm run build",
 		"deploy": "gh-pages -d build",
-		"deploy:prod": "cross-env REACT_APP_API_URL=\"https://unhushing-subhyoid-tyson.ngrok-free.dev\" npm run deploy"
+		"deploy:alt": "gh-pages -d build -b gh-pages-alt",
+		"deploy:prod": "cross-env REACT_APP_API_URL=\"https://unhushing-subhyoid-tyson.ngrok-free.dev\" npm run deploy",
+		"deploy:prod:alt": "cross-env REACT_APP_API_URL=\"https://unhushing-subhyoid-tyson.ngrok-free.dev\" npm run deploy:alt"
 	},
 	"eslintConfig": {
 		"extends": [
