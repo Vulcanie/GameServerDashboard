@@ -15,6 +15,7 @@ function App() {
 	const [servers, setServers] = React.useState({});
 	const [apiError, setApiError] = React.useState(null);
 	const [loading, setLoading] = React.useState(true);
+	const [userRole, setUserRole] = React.useState(null); // New state for user role
 
 	React.useEffect(() => {
 		const API_BASE = process.env.REACT_APP_API_URL || "";
@@ -83,6 +84,15 @@ function App() {
 
 	const selectedServerData = servers[selectedServer] || null;
 
+	if (!userRole) {
+		return (
+			<ThemeProvider theme={darkTheme}>
+				<CssBaseline />
+				<LoginPage onLogin={(role) => setUserRole(role)} />
+			</ThemeProvider>
+		);
+	}
+
 	return (
 		<ThemeProvider theme={darkTheme}>
 			<CssBaseline />
@@ -97,12 +107,14 @@ function App() {
 						loading={loading}
 						onNavigate={navigateToConfig}
 						apiError={apiError}
+						userRole={userRole}
 					/>
 				) : (
 					<ConfigPage
 						serverName={selectedServer}
 						serverStatus={selectedServerData}
 						onBack={navigateToDashboard}
+						userRole={userRole}
 					/>
 				)}
 			</Container>

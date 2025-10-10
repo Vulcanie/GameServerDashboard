@@ -4,7 +4,7 @@ import { grey } from "@mui/material/colors";
 import ServerCard from "./ServerCard";
 
 // This component is responsible for displaying the main grid of server cards.
-function DashboardPage({ servers, loading, onNavigate, apiError }) {
+function DashboardPage({ servers, loading, onNavigate, apiError, userRole }) {
 	return (
 		<>
 			{apiError ? (
@@ -29,7 +29,11 @@ function DashboardPage({ servers, loading, onNavigate, apiError }) {
 						<ServerCard
 							key={name}
 							srv={{ name, ...srv }}
-							onClick={() => onNavigate(name)}
+							onClick={
+								userRole === "admin"
+									? () => onNavigate(name)
+									: undefined // 👈 Disable click for guests
+							}
 						/>
 					))}
 				</Box>
