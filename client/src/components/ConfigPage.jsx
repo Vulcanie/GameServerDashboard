@@ -12,7 +12,7 @@ import { ArrowBack as ArrowBackIcon } from "@mui/icons-material";
 import { grey } from "@mui/material/colors";
 import StatusDisplay from "./StatusDisplay";
 
-function ConfigPage({ serverName, serverStatus, onBack }) {
+function ConfigPage({ serverName, serverStatus, onBack, userRole }) {
 	const [serverInfo, setServerInfo] = React.useState(null);
 	const [configs, setConfigs] = React.useState({});
 	const [activeTab, setActiveTab] = React.useState(0);
@@ -53,8 +53,11 @@ function ConfigPage({ serverName, serverStatus, onBack }) {
 				setLoading(false);
 			}
 		};
-		fetchServerInfo();
-	}, [serverName]);
+
+		if (userRole === "admin") {
+			fetchServerInfo();
+		}
+	}, [serverName, userRole]);
 
 	const handleTabChange = (event, newValue) => {
 		setActiveTab(newValue);
@@ -97,6 +100,24 @@ function ConfigPage({ serverName, serverStatus, onBack }) {
 	};
 
 	const currentConfigName = serverInfo?.configNames?.[activeTab];
+
+	if (userRole !== "admin") {
+		return (
+			<Box sx={{ mt: 4 }}>
+				<Button
+					startIcon={<ArrowBackIcon />}
+					onClick={onBack}
+					sx={{ mb: 2 }}
+				>
+					Back to Dashboard
+				</Button>
+				<Typography variant="h5" color="warning.main">
+					Access Denied: Guest users cannot view or edit server
+					configurations.
+				</Typography>
+			</Box>
+		);
+	}
 
 	return (
 		<Box sx={{ pb: "120px" }}>
