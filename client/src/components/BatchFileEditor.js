@@ -13,7 +13,10 @@ export default function BatchFileEditor({ serverName, onBack }) {
 
 		setLoading(true);
 		fetch(`${API_BASE}/api/batch-files/by-server/${serverName}`, {
-			headers: { "ngrok-skip-browser-warning": "true" },
+			headers: {
+				"ngrok-skip-browser-warning": "true",
+				Accept: "application/json",
+			},
 		})
 			.then((res) => {
 				if (!res.ok) throw new Error("Failed to load batch file");
@@ -39,6 +42,7 @@ export default function BatchFileEditor({ serverName, onBack }) {
 				"Content-Type": "application/json",
 				"ngrok-skip-browser-warning": "true",
 				"x-api-key": API_KEY, // ✅ Add this line
+				Authorization: `Bearer ${API_KEY}`, // ✅ Add this line
 			},
 			body: JSON.stringify({ content }),
 		})
