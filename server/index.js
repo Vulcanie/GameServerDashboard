@@ -5,7 +5,6 @@ import cors from "cors";
 import { Server as IOServer } from "socket.io";
 import path from "path";
 import apiRouter from "../routes/api.js";
-import batchFileRoutes from "../routes/batchFiles.js";
 import { pollServers } from "../services/pollingService.js";
 
 const app = express();
@@ -61,7 +60,6 @@ function requireApiKeyForWrites(req, res, next) {
 // ✅ Apply write protection to sensitive routes
 app.use("/api/config", requireApiKeyForWrites);
 app.use("/api/control", requireApiKeyForWrites);
-app.use("/api/batch-files", requireApiKeyForWrites, batchFileRoutes); // ✅ Protect batch file editing
 
 // ✅ Mount core API routes
 app.use("/api", apiRouter);
