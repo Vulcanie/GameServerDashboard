@@ -9,6 +9,7 @@ import { darkTheme } from "./theme";
 import DashboardPage from "./components/DashboardPage";
 import ConfigPage from "./components/ConfigPage";
 import LoginPage from "./components/LoginPage";
+import BatchFileEditor from "./components/BatchFileEditor";
 
 // ✅ Centralized API base URL
 const API_BASE =
@@ -84,6 +85,10 @@ function App() {
 		setPage("dashboard");
 	};
 
+	const navigateToBatchEditor = () => {
+		setPage("batchEditor");
+	};
+
 	const selectedServerData = servers[selectedServer] || null;
 
 	if (!userRole) {
@@ -116,14 +121,20 @@ function App() {
 						apiError={apiError}
 						userRole={userRole}
 					/>
-				) : (
+				) : page === "config" ? (
 					<ConfigPage
 						serverName={selectedServer}
 						serverStatus={selectedServerData}
 						onBack={navigateToDashboard}
 						userRole={userRole}
+						onEditBatchFiles={navigateToBatchEditor} // ✅ Pass handler
 					/>
-				)}
+				) : page === "batchEditor" ? (
+					<BatchFileEditor
+						serverName={selectedServer}
+						onBack={navigateToConfig}
+					/>
+				) : null}
 			</Container>
 		</ThemeProvider>
 	);
