@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/GameServerDashboard/static/css/main.e6c13ad2.css",
-    "main.js": "/GameServerDashboard/static/js/main.a691d078.js",
+    "main.js": "/GameServerDashboard/static/js/main.e066f4a3.js",
     "static/js/453.eb570f4f.chunk.js": "/GameServerDashboard/static/js/453.eb570f4f.chunk.js",
     "index.html": "/GameServerDashboard/index.html",
     "main.e6c13ad2.css.map": "/GameServerDashboard/static/css/main.e6c13ad2.css.map",
-    "main.a691d078.js.map": "/GameServerDashboard/static/js/main.a691d078.js.map",
+    "main.e066f4a3.js.map": "/GameServerDashboard/static/js/main.e066f4a3.js.map",
     "453.eb570f4f.chunk.js.map": "/GameServerDashboard/static/js/453.eb570f4f.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.a691d078.js"
+    "static/js/main.e066f4a3.js"
   ]
 }
