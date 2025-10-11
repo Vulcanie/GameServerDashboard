@@ -142,16 +142,6 @@ function ConfigPage({
 					<Button startIcon={<ArrowBackIcon />} onClick={onBack}>
 						Back to Dashboard
 					</Button>
-
-					{userRole === "admin" && (
-						<Button
-							variant="outlined"
-							color="warning"
-							onClick={onEditBatchFiles}
-						>
-							Edit Batch Files
-						</Button>
-					)}
 				</Box>
 
 				<Typography variant="h5" color="warning.main">
@@ -170,16 +160,6 @@ function ConfigPage({
 					<Button startIcon={<ArrowBackIcon />} onClick={onBack}>
 						Back to Dashboard
 					</Button>
-
-					{userRole === "admin" && (
-						<Button
-							variant="outlined"
-							color="warning"
-							onClick={onEditBatchFiles}
-						>
-							Edit Batch Files
-						</Button>
-					)}
 				</Box>
 
 				<Typography variant="h5" color="info.main">
@@ -225,16 +205,6 @@ function ConfigPage({
 				<Button startIcon={<ArrowBackIcon />} onClick={onBack}>
 					Back to Dashboard
 				</Button>
-
-				{userRole === "admin" && (
-					<Button
-						variant="outlined"
-						color="warning"
-						onClick={onEditBatchFiles}
-					>
-						Edit Batch Files
-					</Button>
-				)}
 			</Box>
 
 			<Box
