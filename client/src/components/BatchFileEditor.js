@@ -30,13 +30,15 @@ export default function BatchFileEditor({ serverName, onBack }) {
 			.finally(() => setLoading(false));
 	}, [serverName]);
 
+	const API_KEY = process.env.REACT_APP_API_KEY;
+
 	const saveBatchFile = () => {
 		fetch(`${API_BASE}/api/batch-files/by-server/${serverName}`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 				"ngrok-skip-browser-warning": "true",
-				"x-api-key": process.env.REACT_APP_API_KEY, // ✅ Add this line
+				"x-api-key": process.env.API_KEY, // ✅ Add this line
 			},
 			body: JSON.stringify({ content }),
 		})
