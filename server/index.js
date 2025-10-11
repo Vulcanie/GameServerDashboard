@@ -5,8 +5,8 @@ import cors from "cors";
 import { Server as IOServer } from "socket.io";
 import path from "path";
 import apiRouter from "../routes/api.js";
-import { pollServers } from "../services/pollingService.js";
 import batchFileRoutes from "../routes/batchFiles.js";
+import { pollServers } from "../services/pollingService.js";
 
 const app = express();
 
@@ -19,36 +19,24 @@ app.use((req, res, next) => {
 	next();
 });
 
+// ✅ CORS setup
 app.use(
 	cors({
-		origin: "https://vulcanie.github.io", // or "*" for testing
+		origin: "https://vulcanie.github.io",
 		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 		allowedHeaders: [
 			"Content-Type",
 			"Authorization",
 			"x-api-key",
-			"ngrok-skip-browser-warning", // ✅ Add this
-			"mygdx-skip-browser-warning", // ✅ Add this too
+			"ngrok-skip-browser-warning",
+			"mygdx-skip-browser-warning",
 		],
 		credentials: true,
 	}),
 );
 
-app.use("/api/batch-files", batchFileRoutes);
-
-const server = http.createServer(app);
-const io = new IOServer(server, {
-	cors: {
-		origin: process.env.CORS_ORIGIN || "https://vulcanie.github.io",
-		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-	},
-});
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// ✅ Mount API routes first
-app.use("/api", apiRouter);
 
 // ✅ API key middleware for write protection
 function requireApiKeyForWrites(req, res, next) {
@@ -70,15 +58,19 @@ function requireApiKeyForWrites(req, res, next) {
 		.json({ error: "Unauthorized: invalid or missing API key" });
 }
 
+// ✅ Apply write protection to sensitive routes
 app.use("/api/config", requireApiKeyForWrites);
 app.use("/api/control", requireApiKeyForWrites);
+app.use("/api/batch-files", requireApiKeyForWrites, batchFileRoutes); // ✅ Protect batch file editing
 
-// ✅ Serve static frontend only if enabled
+// ✅ Mount core API routes
+app.use("/api", apiRouter);
+
+// ✅ Serve static frontend if enabled
 if (process.env.SERVE_STATIC === "1") {
 	const buildPath = path.resolve("../client/build");
 	app.use(express.static(buildPath));
 
-	// ✅ Guard fallback route to avoid hijacking /api/*
 	app.get("*", (req, res, next) => {
 		if (req.path.startsWith("/api")) return next();
 		res.sendFile(path.join(buildPath, "index.html"));
@@ -91,6 +83,15 @@ app.use("/api/*", (req, res) => {
 	res.status(404).json({ error: "API route not found" });
 });
 
+// ✅ Socket.io setup
+const server = http.createServer(app);
+const io = new IOServer(server, {
+	cors: {
+		origin: process.env.CORS_ORIGIN || "https://vulcanie.github.io",
+		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+	},
+});
+
 io.on("connection", (socket) => {
 	console.log("socket connected:", socket.id);
 	socket.on("disconnect", () =>
@@ -98,6 +99,7 @@ io.on("connection", (socket) => {
 	);
 });
 
+// ✅ Polling setup
 const POLL_INTERVAL_MS = process.env.POLL_INTERVAL_MS
 	? Number(process.env.POLL_INTERVAL_MS)
 	: 5000;
@@ -117,6 +119,7 @@ async function startPolling() {
 	);
 }
 
+// ✅ Start server
 const PORT = process.env.PORT || 3001;
 server.listen(PORT, "0.0.0.0", () => {
 	console.log(`API server listening on http://0.0.0.0:${PORT}`);
