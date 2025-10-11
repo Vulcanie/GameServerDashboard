@@ -38,7 +38,7 @@ export default function BatchFileEditor({ serverName, onBack }) {
 			headers: {
 				"Content-Type": "application/json",
 				"ngrok-skip-browser-warning": "true",
-				"x-api-key": process.env.API_KEY, // ✅ Add this line
+				"x-api-key": API_KEY, // ✅ Add this line
 			},
 			body: JSON.stringify({ content }),
 		})
