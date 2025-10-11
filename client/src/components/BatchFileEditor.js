@@ -36,13 +36,15 @@ export default function BatchFileEditor({ serverName, onBack }) {
 			headers: {
 				"Content-Type": "application/json",
 				"ngrok-skip-browser-warning": "true",
+				"x-api-key": process.env.REACT_APP_API_KEY, // ✅ Add this line
 			},
 			body: JSON.stringify({ content }),
 		})
 			.then((res) => {
-				if (!res.ok) throw new Error("Failed to save batch file");
-				alert("Saved!");
+				if (!res.ok) throw new Error("Save failed");
+				return res.text();
 			})
+			.then(() => alert("Saved!"))
 			.catch((err) => alert(err.message));
 	};
 
