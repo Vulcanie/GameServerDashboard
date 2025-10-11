@@ -12,7 +12,9 @@ export default function BatchFileEditor({ serverName, onBack }) {
 		if (!serverName) return;
 
 		setLoading(true);
-		fetch(`${API_BASE}/api/batch-files/by-server/${serverName}`)
+		fetch(`${API_BASE}/api/batch-files/by-server/${serverName}`, {
+			headers: { "ngrok-skip-browser-warning": "true" },
+		})
 			.then((res) => {
 				if (!res.ok) throw new Error("Failed to load batch file");
 				return res.text();
@@ -31,7 +33,10 @@ export default function BatchFileEditor({ serverName, onBack }) {
 	const saveBatchFile = () => {
 		fetch(`${API_BASE}/api/batch-files/by-server/${serverName}`, {
 			method: "POST",
-			headers: { "Content-Type": "application/json" },
+			headers: {
+				"Content-Type": "application/json",
+				"ngrok-skip-browser-warning": "true",
+			},
 			body: JSON.stringify({ content }),
 		})
 			.then((res) => {
