@@ -6,6 +6,7 @@ import { Server as IOServer } from "socket.io";
 import path from "path";
 import apiRouter from "../routes/api.js";
 import { pollServers } from "../services/pollingService.js";
+import batchFileRoutes from "../routes/batchFiles.js";
 
 const app = express();
 
@@ -56,10 +57,6 @@ function requireApiKeyForWrites(req, res, next) {
 		.status(401)
 		.json({ error: "Unauthorized: invalid or missing API key" });
 }
-
-// ✅ Apply write protection to sensitive routes
-app.use("/api/config", requireApiKeyForWrites);
-app.use("/api/control", requireApiKeyForWrites);
 
 // ✅ Mount core API routes
 app.use("/api", apiRouter);
