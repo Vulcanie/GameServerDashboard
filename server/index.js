@@ -6,6 +6,7 @@ import { Server as IOServer } from "socket.io";
 import path from "path";
 import apiRouter from "../routes/api.js";
 import { pollServers } from "../services/pollingService.js";
+import batchFileRoutes from "../routes/batchFiles.js";
 
 const app = express();
 
@@ -20,17 +21,26 @@ app.use((req, res, next) => {
 
 app.use(
 	cors({
-		origin: "*",
+		origin: "https://vulcanie.github.io", // or "*" for testing
 		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-		allowedHeaders: ["Content-Type", "Authorization", "x-api-key"],
+		allowedHeaders: [
+			"Content-Type",
+			"Authorization",
+			"x-api-key",
+			"ngrok-skip-browser-warning", // ✅ Add this
+			"mygdx-skip-browser-warning", // ✅ Add this too
+		],
+		credentials: true,
 	}),
 );
+
+app.use("/api/batch-files", batchFileRoutes);
 
 const server = http.createServer(app);
 const io = new IOServer(server, {
 	cors: {
 		origin: process.env.CORS_ORIGIN || "https://vulcanie.github.io",
-		methods: ["GET", "POST"],
+		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 	},
 });
 

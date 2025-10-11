@@ -12,7 +12,13 @@ import { ArrowBack as ArrowBackIcon } from "@mui/icons-material";
 import { grey } from "@mui/material/colors";
 import StatusDisplay from "./StatusDisplay";
 
-function ConfigPage({ serverName, serverStatus, onBack, userRole }) {
+function ConfigPage({
+	serverName,
+	serverStatus,
+	onBack,
+	userRole,
+	onEditBatchFiles,
+}) {
 	const [serverInfo, setServerInfo] = React.useState(null);
 	const [configs, setConfigs] = React.useState({});
 	const [activeTab, setActiveTab] = React.useState(0);
@@ -132,13 +138,22 @@ function ConfigPage({ serverName, serverStatus, onBack, userRole }) {
 	if (userRole !== "admin") {
 		return (
 			<Box sx={{ mt: 4 }}>
-				<Button
-					startIcon={<ArrowBackIcon />}
-					onClick={onBack}
-					sx={{ mb: 2 }}
-				>
-					Back to Dashboard
-				</Button>
+				<Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+					<Button startIcon={<ArrowBackIcon />} onClick={onBack}>
+						Back to Dashboard
+					</Button>
+
+					{userRole === "admin" && (
+						<Button
+							variant="outlined"
+							color="warning"
+							onClick={onEditBatchFiles}
+						>
+							Edit Batch Files
+						</Button>
+					)}
+				</Box>
+
 				<Typography variant="h5" color="warning.main">
 					Access Denied: Guest users cannot view or edit server
 					configurations.
@@ -151,13 +166,22 @@ function ConfigPage({ serverName, serverStatus, onBack, userRole }) {
 	if (!loading && serverInfo?.configNames?.length === 0) {
 		return (
 			<Box sx={{ mt: 4 }}>
-				<Button
-					startIcon={<ArrowBackIcon />}
-					onClick={onBack}
-					sx={{ mb: 2 }}
-				>
-					Back to Dashboard
-				</Button>
+				<Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+					<Button startIcon={<ArrowBackIcon />} onClick={onBack}>
+						Back to Dashboard
+					</Button>
+
+					{userRole === "admin" && (
+						<Button
+							variant="outlined"
+							color="warning"
+							onClick={onEditBatchFiles}
+						>
+							Edit Batch Files
+						</Button>
+					)}
+				</Box>
+
 				<Typography variant="h5" color="info.main">
 					This server does not have any editable config files.
 				</Typography>
@@ -197,13 +221,21 @@ function ConfigPage({ serverName, serverStatus, onBack, userRole }) {
 
 	return (
 		<Box sx={{ pb: "120px" }}>
-			<Button
-				startIcon={<ArrowBackIcon />}
-				onClick={onBack}
-				sx={{ mb: 2 }}
-			>
-				Back to Dashboard
-			</Button>
+			<Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+				<Button startIcon={<ArrowBackIcon />} onClick={onBack}>
+					Back to Dashboard
+				</Button>
+
+				{userRole === "admin" && (
+					<Button
+						variant="outlined"
+						color="warning"
+						onClick={onEditBatchFiles}
+					>
+						Edit Batch Files
+					</Button>
+				)}
+			</Box>
 
 			<Box
 				sx={{
