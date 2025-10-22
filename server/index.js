@@ -38,6 +38,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use("/api/batch-files", requireApiKeyForWrites, batchFileRoutes);
 // ✅ API key middleware for write protection
 function requireApiKeyForWrites(req, res, next) {
 	if (req.method === "GET") return next();

@@ -84,18 +84,15 @@ export const SERVERS_TO_QUERY = [
 			"C:/Users/vulca/Desktop/ASA Server/ARK Survival Ascended Valguero Server/",
 	},
 	{
-		name: "MC Legendary Edition",
+		name: "MC GodlyMon (Cobbleverse Modpack)",
 		type: "minecraft",
 		method: "gamedig",
 		host: "127.0.0.1",
 		port: 25565,
 		joinAddress: "50.82.40.123:25565",
-		configPath:
-			"C:/Users/vulca/Documents/Minecraft_Legendary_Edition_1.20.1_2.15_server_pack/server.properties",
-		startScriptPath:
-			"C:/Users/vulca/Documents/Minecraft_Legendary_Edition_1.20.1_2.15_server_pack/start.bat",
-		workingDir:
-			"C:/Users/vulca/Documents/Minecraft_Legendary_Edition_1.20.1_2.15_server_pack",
+		configPath: "C:/Users/vulca/Desktop/Cobblemon server/server.properties",
+		startScriptPath: "C:/Users/vulca/Desktop/Cobblemon server/start.bat",
+		workingDir: "C:/Users/vulca/Desktop/Cobblemon server",
 		rconPort: 25566,
 		rconPassword: "adminpass",
 	},
