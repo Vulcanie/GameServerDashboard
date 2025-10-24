@@ -111,6 +111,20 @@ export const SERVERS_TO_QUERY = [
 		processName: "valheim_server.exe",
 	},
 	{
+		name: "Valheim Modded",
+		type: "valheim",
+		method: "gamedig",
+		host: "127.0.0.1",
+		port: 7780,
+		sessionName: "Godly Modded",
+		serverPassword: "4Honor", // Example path
+		startScriptPath:
+			"C:/Users/vulca/Desktop/Modded Val Serv/steamapps/common/Valheim dedicated server/Valheim-Server-Start.bat",
+		workingDir:
+			"C:/Users/vulca/Desktop/Modded Val Serv/steamapps/common/Valheim dedicated server",
+		processName: "valheim_server.exe",
+	},
+	{
 		name: "Enshrouded",
 		type: "enshrouded",
 		method: "gamedig",
