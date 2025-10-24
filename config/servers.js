@@ -119,10 +119,10 @@ export const SERVERS_TO_QUERY = [
 		sessionName: "Godly Modded",
 		serverPassword: "4Honor", // Example path
 		startScriptPath:
-			"C:/Users/vulca/Desktop/Modded Val Serv/steamapps/common/Valheim dedicated server/Valheim-Server-Start.bat",
+			"C:/Users/vulca/Desktop/Modded Val Serv/Launch Valheim Server.bat",
 		workingDir:
 			"C:/Users/vulca/Desktop/Modded Val Serv/steamapps/common/Valheim dedicated server",
-		processName: "valheim_server.exe",
+		processName: "modded_valheim_server.exe",
 	},
 	{
 		name: "Enshrouded",
