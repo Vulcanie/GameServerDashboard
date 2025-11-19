@@ -41,6 +41,7 @@ function ConfigPage({
 						headers: {
 							Accept: "application/json",
 							"ngrok-skip-browser-warning": "true",
+							"Access-Control-Allow-Origin": "*",
 						},
 					},
 				);
@@ -60,6 +61,7 @@ function ConfigPage({
 								headers: {
 									Accept: "application/json",
 									"ngrok-skip-browser-warning": "true",
+									"Access-Control-Allow-Origin": "*",
 								},
 							},
 						);
@@ -100,6 +102,7 @@ function ConfigPage({
 					headers: {
 						"Content-Type": "application/json",
 						"ngrok-skip-browser-warning": "true",
+						"Access-Control-Allow-Origin": "*",
 					},
 					body: JSON.stringify({
 						fileName: activeConfigName,
@@ -123,6 +126,7 @@ function ConfigPage({
 					method: "POST",
 					headers: {
 						"ngrok-skip-browser-warning": "true",
+						"Access-Control-Allow-Origin": "*",
 					},
 				},
 			);

@@ -30,6 +30,7 @@ app.use(
 			"x-api-key",
 			"ngrok-skip-browser-warning",
 			"mygdx-skip-browser-warning",
+			"Access-Control-Allow-Origin",
 		],
 		credentials: true,
 	}),

@@ -68,6 +68,8 @@ router.post("/by-server/:serverName", async (req, res) => {
 		res.setHeader(
 			"access-control-allow-headers",
 			"x-api-key,authorization",
+			"Access-Control-Allow-Origin",
+			"*",
 		);
 		res.json({ success: true, message: "Batch file saved successfully!" });
 	} catch (err) {
