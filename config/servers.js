@@ -14,14 +14,13 @@ export const SERVERS_TO_QUERY = [
 		serverPassword: "4Honor",
 		configPaths: {
 			"GameUserSettings.ini":
-				"C:/Users/vulca/Desktop/ASA Server/ARK Survival Ascended Ragnarok Server/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini",
+				"C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini",
 			"Game.ini":
-				"C:/Users/vulca/Desktop/ASA Server/ARK Survival Ascended Ragnarok Server/ShooterGame/Saved/Config/WindowsServer/Game.ini",
+				"C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/ShooterGame/Saved/Config/WindowsServer/Game.ini",
 		},
 		startScriptPath:
-			"C:/Users/vulca/Desktop/ASA Server/ARK Survival Ascended Ragnarok Server/Start_Ragnarok.bat",
-		workingDir:
-			"C:/Users/vulca/Desktop/ASA Server/ARK Survival Ascended Ragnarok Server/",
+			"C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/Start_Ragnarok.bat",
+		workingDir: "C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/",
 	},
 	{
 		name: "Ark-TheIsland",
@@ -34,14 +33,13 @@ export const SERVERS_TO_QUERY = [
 		serverPassword: "4Honor",
 		configPaths: {
 			"GameUserSettings.ini":
-				"C:/Users/vulca/Desktop/ASA Server/ARK Survival Ascended TheIsland Server/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini",
+				"C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini",
 			"Game.ini":
-				"C:/Users/vulca/Desktop/ASA Server/ARK Survival Ascended TheIsland Server/ShooterGame/Saved/Config/WindowsServer/Game.ini",
+				"C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/ShooterGame/Saved/Config/WindowsServer/Game.ini",
 		},
 		startScriptPath:
-			"C:/Users/vulca/Desktop/ASA Server/ARK Survival Ascended TheIsland Server/Start_TheIsland.bat",
-		workingDir:
-			"C:/Users/vulca/Desktop/ASA Server/ARK Survival Ascended TheIsland Server/",
+			"C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/Start_TheIsland.bat",
+		workingDir: "C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/",
 	},
 	{
 		name: "Ark-ScorchedEarth",
@@ -54,14 +52,13 @@ export const SERVERS_TO_QUERY = [
 		serverPassword: "4Honor",
 		configPaths: {
 			"GameUserSettings.ini":
-				"C:/Users/vulca/Desktop/ASA Server/ARK Survival Ascended ScorchedEarth Server/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini",
+				"C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini",
 			"Game.ini":
-				"C:/Users/vulca/Desktop/ASA Server/ARK Survival Ascended ScorchedEarth Server/ShooterGame/Saved/Config/WindowsServer/Game.ini",
+				"C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/ShooterGame/Saved/Config/WindowsServer/Game.ini",
 		},
 		startScriptPath:
-			"C:/Users/vulca/Desktop/ASA Server/ARK Survival Ascended ScorchedEarth Server/Start_ScorchedEarth.bat",
-		workingDir:
-			"C:/Users/vulca/Desktop/ASA Server/ARK Survival Ascended ScorchedEarth Server/",
+			"C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/Start_ScorchedEarth.bat",
+		workingDir: "C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/",
 	},
 	{
 		name: "Ark-Valguero",
@@ -74,15 +71,35 @@ export const SERVERS_TO_QUERY = [
 		serverPassword: "4Honor",
 		configPaths: {
 			"GameUserSettings.ini":
-				"C:/Users/vulca/Desktop/ASA Server/ARK Survival Ascended Valguero Server/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini",
+				"C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini",
 			"Game.ini":
-				"C:/Users/vulca/Desktop/ASA Server/ARK Survival Ascended Valguero Server/ShooterGame/Saved/Config/WindowsServer/Game.ini",
+				"C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/ShooterGame/Saved/Config/WindowsServer/Game.ini",
 		},
 		startScriptPath:
-			"C:/Users/vulca/Desktop/ASA Server/ARK Survival Ascended Valguero Server/Start_Valguero.bat",
-		workingDir:
-			"C:/Users/vulca/Desktop/ASA Server/ARK Survival Ascended Valguero Server/",
+			"C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/Start_Valguero.bat",
+		workingDir: "C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/",
 	},
+
+	{
+		name: "Ark-ClubArk",
+		type: "ark",
+		method: "rcon",
+		host: "127.0.0.1",
+		rconPort: 27033,
+		rconPassword: "adminpass",
+		sessionName: "GodlyClubArk",
+		serverPassword: "4Honor",
+		configPaths: {
+			"GameUserSettings.ini":
+				"C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini",
+			"Game.ini":
+				"C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/ShooterGame/Saved/Config/WindowsServer/Game.ini",
+		},
+		startScriptPath:
+			"C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/Start_Valguero.bat",
+		workingDir: "C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/",
+	},
+
 	{
 		name: "MC GodlyMon (Cobbleverse Modpack)",
 		type: "minecraft",
@@ -109,6 +126,20 @@ export const SERVERS_TO_QUERY = [
 		workingDir:
 			"C:/Users/vulca/Desktop/Valheim/steamapps/common/Valheim dedicated server",
 		processName: "valheim_server.exe",
+	},
+	{
+		name: "Valheim Modded",
+		type: "valheim",
+		method: "gamedig",
+		host: "127.0.0.1",
+		port: 7780,
+		sessionName: "Godly Modded",
+		serverPassword: "4Honor", // Example path
+		startScriptPath:
+			"C:/Users/vulca/Desktop/Modded Val Serv/Launch Valheim Server.bat",
+		workingDir:
+			"C:/Users/vulca/Desktop/Modded Val Serv/steamapps/common/Valheim dedicated server",
+		processName: "modded_valheim_server.exe",
 	},
 	{
 		name: "Enshrouded",

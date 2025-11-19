@@ -37,6 +37,7 @@ function App() {
 					headers: {
 						Accept: "application/json",
 						"ngrok-skip-browser-warning": "true",
+						"Access-Control-Allow-Origin": "*",
 					},
 				});
 
