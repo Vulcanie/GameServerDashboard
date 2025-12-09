@@ -32,7 +32,7 @@ function App() {
 
 		const fetchData = async () => {
 			try {
-				const url = joinUrl(API_BASE, "/api/status");
+				const url = joinUrl(API_BASE, "/api/status/latest");
 				const res = await fetch(url, {
 					headers: {
 						Accept: "application/json",
