@@ -16,20 +16,31 @@ let lastSnapshot = {};
 async function diffAndBroadcast(current, previous) {
 	for (const [serverName, cur] of Object.entries(current)) {
 		const prev = previous[serverName] || {};
+		console.log("Checking changes for", serverName);
 
 		// -----------------------------
 		// ONLINE / OFFLINE STATE CHANGE
 		// -----------------------------
-		if (prev.online !== undefined && cur.online !== prev.online) {
+		const hadPrevious = previous[serverName] !== undefined;
+
+		// FIRST TIME DETECTION
+		if (!hadPrevious && cur.online) {
+			await sendDiscordAlert(
+				`🟢 ${serverName} detected ONLINE\n` +
+					`Session: ${cur.sessionName || "Unknown"}\n` +
+					`Players: ${cur.playerCount}`,
+			);
+		}
+
+		// NORMAL TRANSITIONS
+		else if (hadPrevious && cur.online !== prev.online) {
 			if (cur.online) {
-				// Server came online
 				await sendDiscordAlert(
 					`🟢 ${serverName} is now ONLINE\n` +
 						`Session: ${cur.sessionName || "Unknown"}\n` +
 						`Players: ${cur.playerCount}`,
 				);
 			} else {
-				// Server went offline
 				await sendDiscordAlert(`🔴 ${serverName} went OFFLINE`);
 			}
 		}
@@ -51,6 +62,7 @@ async function diffAndBroadcast(current, previous) {
 				serverName,
 				status: cur,
 			});
+			console.log("state changed for", serverName);
 		}
 	}
 
