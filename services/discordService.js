@@ -1,39 +1,45 @@
 import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL;
-const MESSAGE_FILE = "./message_id.json";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const MESSAGE_FILE = path.join(__dirname, "message_id.json");
+
+// HARDCODED URL FOR TESTING
+const WEBHOOK_URL =
+	"https://discord.com/api/webhooks/1478623363550150847/f_tfwqjHzuEGMKbsJgLY49vkRLzrExmN1Cg0mjAaldPydBD4z9onuhyHb-1kSZV6jmnl";
 
 export async function updateDiscordDashboard(serverStatus) {
-	if (!WEBHOOK_URL) return;
+	console.log("--- 🏁 Discord Update Function Started ---");
 
-	// 1. Build the fields only for ONLINE servers
-	const fields = Object.entries(serverStatus)
-		.filter(([_, data]) => data.online)
-		.map(([name, data]) => ({
-			name: `🎮 ${name}`,
-			value: [
-				data.sessionName ? `**Session:** ${data.sessionName}` : null,
-				data.playerCount !== undefined
-					? `**Players:** ${data.playerCount}`
-					: null,
-				data.ping ? `**Ping:** ${data.ping}ms` : null,
-				data.joinAddress ? `**IP:** \`${data.joinAddress}\`` : null,
-			]
-				.filter(Boolean)
-				.join("\n"),
-			inline: false,
-		}));
+	// Check if any servers are actually online
+	const onlineServers = Object.entries(serverStatus).filter(
+		([_, data]) => data.online,
+	);
 
-	if (fields.length === 0) return; // Or send an "All servers offline" embed
+	console.log(`[Debug] Servers found online: ${onlineServers.length}`);
+
+	if (onlineServers.length === 0) {
+		console.log(
+			"⚠️ No servers are online. Skipping Discord update to keep dashboard clean.",
+		);
+		return;
+	}
+
+	const fields = onlineServers.map(([name, data]) => ({
+		name: `🎮 ${name}`,
+		value: `**Players:** ${data.playerCount}\n**Status:** Online`,
+		inline: true,
+	}));
 
 	const payload = {
 		embeds: [
 			{
-				title: "Server Status Dashboard",
+				title: "Live Server Monitor",
 				color: 0x00ff00,
 				fields: fields,
-				timestamp: new Date().toISOString(),
-				footer: { text: "Updates automatically when status changes" },
+				footer: { text: "Hardcoded Test Mode" },
+				timestamp: new Date(),
 			},
 		],
 	};
@@ -41,27 +47,51 @@ export async function updateDiscordDashboard(serverStatus) {
 	try {
 		let messageId = null;
 		if (fs.existsSync(MESSAGE_FILE)) {
-			messageId = JSON.parse(fs.readFileSync(MESSAGE_FILE)).id;
+			const fileContent = fs.readFileSync(MESSAGE_FILE, "utf-8");
+			messageId = JSON.parse(fileContent).id;
+			console.log(
+				`[Debug] Found existing Message ID in file: ${messageId}`,
+			);
 		}
 
 		if (!messageId) {
-			// Create fresh message
+			console.log("[Action] Sending NEW message to Discord...");
 			const res = await fetch(`${WEBHOOK_URL}?wait=true`, {
 				method: "POST",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(payload),
 			});
+
 			const data = await res.json();
-			fs.writeFileSync(MESSAGE_FILE, JSON.stringify({ id: data.id }));
+			if (res.ok) {
+				fs.writeFileSync(MESSAGE_FILE, JSON.stringify({ id: data.id }));
+				console.log("✅ SUCCESS: New message posted and ID saved.");
+			} else {
+				console.error("❌ Discord POST Error:", data);
+			}
 		} else {
-			// Edit existing message
-			await fetch(`${WEBHOOK_URL}/messages/${messageId}`, {
+			console.log("[Action] Patching existing message...");
+			const res = await fetch(`${WEBHOOK_URL}/messages/${messageId}`, {
 				method: "PATCH",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify(payload),
 			});
+
+			if (res.ok) {
+				console.log("✅ SUCCESS: Message updated.");
+			} else {
+				const errData = await res.json();
+				console.error("❌ Discord PATCH Error:", errData);
+
+				if (res.status === 404) {
+					console.log(
+						"Emptying stale message_id.json and retrying...",
+					);
+					fs.unlinkSync(MESSAGE_FILE);
+				}
+			}
 		}
 	} catch (err) {
-		console.error("Discord Dashboard Update Failed:", err.message);
+		console.error("❌ Network/Fetch Error:", err.message);
 	}
 }

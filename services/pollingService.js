@@ -13,81 +13,72 @@ SERVERS_TO_QUERY.forEach((s) => {
 let lastSnapshot = {};
 
 async function diffAndBroadcast(current, previous) {
+	let globalChangeDetected = false;
+
 	for (const [serverName, cur] of Object.entries(current)) {
-		const prev = previous[serverName] || {};
-		console.log("Checking changes for", serverName);
+		const prev = previous[serverName];
 
-		// -----------------------------
-		// ONLINE / OFFLINE STATE CHANGE
-		// -----------------------------
-		const hadPrevious = previous[serverName] !== undefined;
-
-		// FIRST TIME DETECTION
-		if (!hadPrevious && cur.online) {
-			await sendDiscordAlert(
-				`🟢 ${serverName} detected ONLINE\n` +
-					`Session: ${cur.sessionName || "Unknown"}\n` +
-					`Players: ${cur.playerCount}`,
-			);
+		// 1. Initial State Handling
+		// If this is the very first poll, we skip the "Alerts" to avoid spamming
+		// but we still trigger the initial Dashboard update.
+		if (!prev) {
+			globalChangeDetected = true;
+			continue;
 		}
 
-		// NORMAL TRANSITIONS
-		else if (hadPrevious && cur.online !== prev.online) {
+		// 2. Online/Offline State Transition
+		const statusChanged = cur.online !== prev.online;
+
+		if (statusChanged) {
+			globalChangeDetected = true;
+
 			if (cur.online) {
+				console.log(`[ALERT] ${serverName} is now ONLINE`);
 				await sendDiscordAlert(
-					`🟢 ${serverName} is now ONLINE\n` +
-						`Session: ${cur.sessionName || "Unknown"}\n` +
-						`Players: ${cur.playerCount}`,
+					`🟢 Server Online: ${serverName}`,
+					`**Session:** ${cur.sessionName || "N/A"}\n**Players:** ${cur.playerCount}`,
+					3066993, // Green
 				);
 			} else {
-				await sendDiscordAlert(`🔴 ${serverName} went OFFLINE`);
+				console.log(`[ALERT] ${serverName} is now OFFLINE`);
+				await sendDiscordAlert(
+					`🔴 Server Offline: ${serverName}`,
+					`Connection to the server has been lost.`,
+					15158332, // Red
+				);
 			}
 		}
 
-		// -----------------------------
-		// EXISTING CHANGE DETECTION (SSE)
-		// -----------------------------
-		const changed =
-			cur.online !== prev.online ||
+		// 3. Player Count / Session Change Detection
+		// We trigger a "Global Change" so the Dashboard/SSE updates,
+		// but we don't necessarily send a "New Message" alert for every single player join.
+		const dataChanged =
 			cur.playerCount !== prev.playerCount ||
-			JSON.stringify(cur.playerList) !==
-				JSON.stringify(prev.playerList) ||
 			cur.sessionName !== prev.sessionName ||
 			cur.ping !== prev.ping;
 
-		if (changed) {
+		if (dataChanged) {
+			globalChangeDetected = true;
+		}
+
+		// 4. SSE Broadcast (Real-time Frontend Update)
+		// We send this if status OR data changed for this specific server
+		if (statusChanged || dataChanged) {
 			broadcastSseEvent({
 				type: "server_update",
 				serverName,
 				status: cur,
 			});
-			console.log("state changed for", serverName);
+			console.log(`[SSE] Broadcasted update for ${serverName}`);
 		}
 	}
 
-	// -----------------------------
-	// NEW SERVER DETECTED
-	// -----------------------------
-	for (const serverName of Object.keys(current)) {
-		if (!previous[serverName]) {
-			broadcastSseEvent({
-				type: "server_added",
-				serverName,
-				status: current[serverName],
-			});
-		}
-	}
-
-	// -----------------------------
-	// REMOVED SERVER DETECTED
-	// -----------------------------
-	for (const serverName of Object.keys(previous)) {
-		if (!current[serverName]) {
-			broadcastSseEvent({
-				type: "server_removed",
-				serverName,
-			});
-		}
+	// 5. Update the Live Discord Dashboard
+	// If anything at all changed across any server, we PATCH the dashboard message.
+	if (globalChangeDetected) {
+		console.log("[Discord] Patching live dashboard message...");
+		await updateDiscordDashboard(current);
+		console.log("[Discord] Dashboard update complete.");
 	}
 }
 // Main polling function
