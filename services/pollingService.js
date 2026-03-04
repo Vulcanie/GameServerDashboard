@@ -2,8 +2,7 @@ import { GameDig } from "gamedig";
 import { Rcon } from "rcon-client";
 import { SERVERS_TO_QUERY } from "../config/servers.js";
 import { broadcastSseEvent } from "../routes/api.js"; // adjust path if needed
-import { sendDiscordAlert } from "./discordService.js";
-
+import { updateDiscordDashboard } from "./discordService.js";
 // Holds the latest known status
 export let serverStatus = {};
 SERVERS_TO_QUERY.forEach((s) => {
@@ -199,6 +198,8 @@ export const pollServers = async () => {
 
 		// Run diff + Discord alerts + SSE
 		await diffAndBroadcast(serverStatus, lastSnapshot);
+
+		await updateDiscordDashboard(serverStatus);
 
 		// Update snapshot AFTER diff completes
 		lastSnapshot = JSON.parse(JSON.stringify(serverStatus));
