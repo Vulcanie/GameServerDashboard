@@ -81,6 +81,26 @@ export const SERVERS_TO_QUERY = [
 	},
 
 	{
+		name: "Ark-Astraeos",
+		type: "ark",
+		method: "rcon",
+		host: "127.0.0.1",
+		rconPort: 27035,
+		rconPassword: "adminpass",
+		sessionName: "GodlyAstraeos",
+		serverPassword: "4Honor",
+		configPaths: {
+			"GameUserSettings.ini":
+				"C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/ShooterGame/Saved/Config/WindowsServer/GameUserSettings.ini",
+			"Game.ini":
+				"C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/ShooterGame/Saved/Config/WindowsServer/Game.ini",
+		},
+		startScriptPath:
+			"C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/Start_Astraeos.bat",
+		workingDir: "C:/Users/vulca/Desktop/ASA Server/ARK_SharedInstall/",
+	},
+
+	{
 		name: "Ark-ClubArk",
 		type: "ark",
 		method: "rcon",

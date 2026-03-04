@@ -1,8 +1,6 @@
 import "dotenv/config";
 import express from "express";
-import http from "http";
 import cors from "cors";
-import { Server as IOServer } from "socket.io";
 import path from "path";
 import apiRouter from "../routes/api.js";
 import { pollServers } from "../services/pollingService.js";
@@ -29,7 +27,6 @@ app.use(
 			"Authorization",
 			"x-api-key",
 			"ngrok-skip-browser-warning",
-			"mygdx-skip-browser-warning",
 			"Access-Control-Allow-Origin",
 		],
 		credentials: true,
@@ -39,7 +36,6 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api/batch-files", requireApiKeyForWrites, batchFileRoutes);
 // ✅ API key middleware for write protection
 function requireApiKeyForWrites(req, res, next) {
 	if (req.method === "GET") return next();
@@ -53,6 +49,7 @@ function requireApiKeyForWrites(req, res, next) {
 		(req.get("authorization") || "").split(" ")[1] ||
 		""
 	).toString();
+
 	if (provided === apiKey) return next();
 
 	return res
@@ -60,10 +57,13 @@ function requireApiKeyForWrites(req, res, next) {
 		.json({ error: "Unauthorized: invalid or missing API key" });
 }
 
-// ✅ Mount core API routes
+// Batch file routes
+app.use("/api/batch-files", requireApiKeyForWrites, batchFileRoutes);
+
+// Core API routes (includes SSE)
 app.use("/api", apiRouter);
 
-// ✅ Serve static frontend if enabled
+// Optional static hosting
 if (process.env.SERVE_STATIC === "1") {
 	const buildPath = path.resolve("../client/build");
 	app.use(express.static(buildPath));
@@ -74,53 +74,23 @@ if (process.env.SERVE_STATIC === "1") {
 	});
 }
 
-// ✅ Catch-all for unhandled API routes
+// Catch-all for unhandled API routes
 app.use("/api/*", (req, res) => {
 	console.warn("Unhandled API route:", req.method, req.originalUrl);
 	res.status(404).json({ error: "API route not found" });
 });
 
-// ✅ Socket.io setup
-const server = http.createServer(app);
-const io = new IOServer(server, {
-	cors: {
-		origin: process.env.CORS_ORIGIN || "https://vulcanie.github.io",
-		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-	},
-});
-
-io.on("connection", (socket) => {
-	console.log("socket connected:", socket.id);
-	socket.on("disconnect", () =>
-		console.log("socket disconnected:", socket.id),
-	);
-});
-
-// ✅ Polling setup
-const POLL_INTERVAL_MS = process.env.POLL_INTERVAL_MS
-	? Number(process.env.POLL_INTERVAL_MS)
-	: 5000;
-
-async function startPolling() {
-	try {
-		await pollServers(io);
-	} catch (err) {
-		console.error("Initial polling failed:", err);
-	}
-	setInterval(
-		() =>
-			pollServers(io).catch((err) =>
-				console.error("Polling failed:", err),
-			),
-		POLL_INTERVAL_MS,
-	);
-}
-
-// ✅ Start server
+// --------------------------------------------
+// 🚀 START SERVER (NO SOCKET.IO ANYMORE)
+// --------------------------------------------
 const PORT = process.env.PORT || 3001;
-server.listen(PORT, "0.0.0.0", () => {
+
+app.listen(PORT, "0.0.0.0", () => {
 	console.log(`API server listening on http://0.0.0.0:${PORT}`);
-	startPolling();
+
+	// Start polling loop (no io argument)
+	pollServers();
+	setInterval(pollServers, 5000);
 });
 
-export default server;
+export default app;

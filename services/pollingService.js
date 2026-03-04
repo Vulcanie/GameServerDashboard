@@ -1,19 +1,64 @@
 import { GameDig } from "gamedig";
 import { Rcon } from "rcon-client";
 import { SERVERS_TO_QUERY } from "../config/servers.js";
+import { broadcastSseEvent } from "../routes/api.js"; // adjust path if needed
 
-// This will hold the latest status of all servers and is exported
-// so the api.js file can access it directly.
+// Holds the latest known status
 export let serverStatus = {};
 SERVERS_TO_QUERY.forEach((s) => {
-	serverStatus[s.name] = { online: false, players: [], playerCount: 0 };
+	serverStatus[s.name] = { online: false, playerList: [], playerCount: 0 };
 });
 
-// This function polls all servers and updates the shared status object.
-// It takes the `io` instance as an argument to broadcast updates.
-export const pollServers = async (io) => {
+// Snapshot for diffing
+let lastSnapshot = {};
+
+// Compare old vs new and broadcast only meaningful changes
+function diffAndBroadcast(current, previous) {
+	for (const [serverName, cur] of Object.entries(current)) {
+		const prev = previous[serverName] || {};
+
+		const changed =
+			cur.online !== prev.online ||
+			cur.playerCount !== prev.playerCount ||
+			JSON.stringify(cur.playerList) !==
+				JSON.stringify(prev.playerList) ||
+			cur.sessionName !== prev.sessionName ||
+			cur.ping !== prev.ping;
+
+		if (changed) {
+			broadcastSseEvent({
+				type: "server_update",
+				serverName,
+				status: cur,
+			});
+		}
+	}
+
+	// Detect new servers
+	for (const serverName of Object.keys(current)) {
+		if (!previous[serverName]) {
+			broadcastSseEvent({
+				type: "server_added",
+				serverName,
+				status: current[serverName],
+			});
+		}
+	}
+
+	// Detect removed servers (optional)
+	for (const serverName of Object.keys(previous)) {
+		if (!current[serverName]) {
+			broadcastSseEvent({
+				type: "server_removed",
+				serverName,
+			});
+		}
+	}
+}
+
+// Main polling function
+export const pollServers = async () => {
 	const promises = SERVERS_TO_QUERY.map(async (serverConfig) => {
-		// This object holds static info we want to send to the frontend.
 		const baseInfo = {
 			sessionName: serverConfig.sessionName,
 			serverPassword: serverConfig.serverPassword,
@@ -21,7 +66,7 @@ export const pollServers = async (io) => {
 			type: serverConfig.type,
 		};
 
-		// --- RCON Polling Logic ---
+		// --- RCON Polling ---
 		if (serverConfig.method === "rcon") {
 			let rcon;
 			try {
@@ -31,9 +76,11 @@ export const pollServers = async (io) => {
 					password: serverConfig.rconPassword,
 				});
 				await rcon.connect();
+
 				const startTime = Date.now();
 				const playerListStr = await rcon.send("ListPlayers");
 				const ping = Date.now() - startTime;
+
 				const players = playerListStr
 					.split("\n")
 					.map((line) => line.trim())
@@ -45,13 +92,12 @@ export const pollServers = async (io) => {
 						),
 					);
 
-				// Update status with live and static info
 				serverStatus[serverConfig.name] = {
 					...baseInfo,
 					online: true,
 					playerCount: players.length,
 					playerList: players,
-					ping: ping,
+					ping,
 				};
 			} catch (error) {
 				serverStatus[serverConfig.name] = {
@@ -64,7 +110,8 @@ export const pollServers = async (io) => {
 				if (rcon) await rcon.end();
 			}
 		}
-		// --- Gamedig Polling Logic ---
+
+		// --- Gamedig Polling ---
 		else if (serverConfig.method === "gamedig") {
 			try {
 				const state = await GameDig.query({
@@ -72,6 +119,7 @@ export const pollServers = async (io) => {
 					host: serverConfig.host,
 					port: serverConfig.port,
 				});
+
 				serverStatus[serverConfig.name] = {
 					...baseInfo,
 					online: true,
@@ -92,11 +140,11 @@ export const pollServers = async (io) => {
 		}
 	});
 
-	// Wait for all server checks to complete.
 	await Promise.allSettled(promises);
 
-	// Broadcast the fresh data to all connected clients.
-	if (io) {
-		io.emit("update", serverStatus);
-	}
+	// Compare and broadcast changes
+	diffAndBroadcast(serverStatus, lastSnapshot);
+
+	// Update snapshot
+	lastSnapshot = JSON.parse(JSON.stringify(serverStatus));
 };
