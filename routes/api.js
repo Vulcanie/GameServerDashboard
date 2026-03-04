@@ -73,6 +73,10 @@ router.get("/status", (req, res) => {
 	res.json(serverStatus);
 });
 
+router.get("/status/latest", (req, res) => {
+	res.json(serverStatus);
+});
+
 // Basic info about a single server
 router.get("/server/:serverName", (req, res) => {
 	const server = SERVERS_TO_QUERY.find(
