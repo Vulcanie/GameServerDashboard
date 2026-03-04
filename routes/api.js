@@ -31,16 +31,11 @@ router.get("/events", (req, res) => {
 	res.setHeader("Content-Type", "text/event-stream");
 	res.setHeader("Cache-Control", "no-cache");
 	res.setHeader("Connection", "keep-alive");
-
-	// Keep ngrok happy
-	res.setHeader("ngrok-skip-browser-warning", "true");
-
-	// Some proxies require this
+	res.setHeader("Access-Control-Allow-Origin", "https://vulcanie.github.io");
+	// Cloudflare requires this to flush headers immediately
 	if (res.flushHeaders) res.flushHeaders();
-
 	// Add client to the set
 	sseClients.add(res);
-
 	// Initial event so frontend knows it's connected
 	res.write(
 		`data: ${JSON.stringify({
@@ -48,10 +43,15 @@ router.get("/events", (req, res) => {
 			timestamp: Date.now(),
 		})}\n\n`,
 	);
-
+	// Heartbeat every 15 seconds (Cloudflare requires this)
+	const heartbeat = setInterval(() => {
+		res.write("data: {}\n\n");
+	}, 15000);
 	// Remove client on disconnect
 	req.on("close", () => {
+		clearInterval(heartbeat);
 		sseClients.delete(res);
+		res.end();
 	});
 });
 
@@ -87,8 +87,8 @@ router.get("/server/:serverName", (req, res) => {
 		configNames: server.configPaths
 			? Object.keys(server.configPaths)
 			: server.configPath
-			? ["config"]
-			: [],
+				? ["config"]
+				: [],
 	});
 });
 
