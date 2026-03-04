@@ -27,8 +27,8 @@
 		"predeploy": "npm run build",
 		"deploy": "gh-pages -d build",
 		"deploy:alt": "gh-pages -d build -b gh-pages-alt",
-		"deploy:prod": "cross-env REACT_APP_API_URL=\"https://unhushing-subhyoid-tyson.ngrok-free.dev\" npm run deploy",
-		"deploy:prod:alt": "cross-env REACT_APP_API_URL=\"https://unhushing-subhyoid-tyson.ngrok-free.dev\" npm run deploy:alt"
+		"deploy:prod": "cross-env REACT_APP_API_URL=\"https://api.godlyheroes-api.com\" npm run deploy",
+		"deploy:prod:alt": "cross-env REACT_APP_API_URL=\"https://api.godlyheroes-api.com\" npm run deploy:alt"
 	},
 	"eslintConfig": {
 		"extends": [

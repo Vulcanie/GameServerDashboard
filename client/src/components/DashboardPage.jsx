@@ -3,7 +3,7 @@ import { Box, Typography, CircularProgress } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import ServerCard from "./ServerCard";
 
-// This component is responsible for displaying the main grid of server cards.
+// This component displays the main grid of server cards.
 function DashboardPage({ servers, loading, onNavigate, apiError, userRole }) {
 	return (
 		<>
@@ -12,9 +12,12 @@ function DashboardPage({ servers, loading, onNavigate, apiError, userRole }) {
 					API error: {apiError}
 				</Typography>
 			) : null}
+
+			{/* Updated text to reflect SSE instead of polling */}
 			<Typography align="center" sx={{ color: grey[500], mb: 4 }}>
-				Auto-refreshing every 5 seconds
+				Live updates enabled (SSE)
 			</Typography>
+
 			{loading ? (
 				<CircularProgress sx={{ display: "block", mx: "auto" }} />
 			) : (
@@ -32,7 +35,7 @@ function DashboardPage({ servers, loading, onNavigate, apiError, userRole }) {
 							onClick={
 								userRole === "admin"
 									? () => onNavigate(name)
-									: undefined // 👈 Disable click for guests
+									: undefined // Disable click for guests
 							}
 						/>
 					))}

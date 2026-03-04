@@ -7,7 +7,59 @@ import { serverStatus } from "../services/pollingService.js";
 
 const router = express.Router();
 
-// ✅ Middleware to handle ngrok browser warning header
+// -------------------------------
+// 🔥 SSE CLIENT MANAGEMENT
+// -------------------------------
+const sseClients = new Set();
+
+/**
+ * Broadcast an SSE event to all connected clients.
+ * Called by pollingService.js when status changes.
+ */
+export function broadcastSseEvent(payload) {
+	const data = `data: ${JSON.stringify(payload)}\n\n`;
+	for (const res of sseClients) {
+		res.write(data);
+	}
+}
+
+// -------------------------------
+// 🔥 SSE ENDPOINT
+// -------------------------------
+router.get("/events", (req, res) => {
+	// Required SSE headers
+	res.setHeader("Content-Type", "text/event-stream");
+	res.setHeader("Cache-Control", "no-cache");
+	res.setHeader("Connection", "keep-alive");
+	res.setHeader("Access-Control-Allow-Origin", "https://vulcanie.github.io");
+	// Cloudflare requires this to flush headers immediately
+	if (res.flushHeaders) res.flushHeaders();
+	// Add client to the set
+	sseClients.add(res);
+	// Initial event so frontend knows it's connected
+	res.write(
+		`data: ${JSON.stringify({
+			type: "connected",
+			timestamp: Date.now(),
+		})}\n\n`,
+	);
+	// Heartbeat every 15 seconds (Cloudflare requires this)
+	const heartbeat = setInterval(() => {
+		res.write("data: {}\n\n");
+	}, 15000);
+	// Remove client on disconnect
+	req.on("close", () => {
+		clearInterval(heartbeat);
+		sseClients.delete(res);
+		res.end();
+	});
+});
+
+// -------------------------------
+// EXISTING ROUTES (unchanged)
+// -------------------------------
+
+// Middleware to handle ngrok browser warning header
 router.use((req, res, next) => {
 	if (req.headers["ngrok-skip-browser-warning"]) {
 		res.setHeader("ngrok-skip-browser-warning", "true");
@@ -15,13 +67,17 @@ router.use((req, res, next) => {
 	next();
 });
 
-// ✅ Live status of all servers
+// Live status of all servers
 router.get("/status", (req, res) => {
 	res.setHeader("Content-Type", "application/json");
 	res.json(serverStatus);
 });
 
-// ✅ Basic info about a single server
+router.get("/status/latest", (req, res) => {
+	res.json(serverStatus);
+});
+
+// Basic info about a single server
 router.get("/server/:serverName", (req, res) => {
 	const server = SERVERS_TO_QUERY.find(
 		(s) => s.name === req.params.serverName,
@@ -35,28 +91,32 @@ router.get("/server/:serverName", (req, res) => {
 		configNames: server.configPaths
 			? Object.keys(server.configPaths)
 			: server.configPath
-			? ["config"]
-			: [],
+				? ["config"]
+				: [],
 	});
 });
 
-// ✅ Get content of a specific config file
+// Get content of a specific config file
 router.get("/config/:serverName", async (req, res) => {
 	const server = SERVERS_TO_QUERY.find(
 		(s) => s.name === req.params.serverName,
 	);
 	const { file } = req.query;
+
 	if (!server) {
 		return res.status(404).json({ error: "Server not found" });
 	}
+
 	let pathToRead = server.configPaths
 		? server.configPaths[file]
 		: server.configPath;
+
 	if (!pathToRead) {
 		return res
 			.status(400)
 			.json({ error: "Valid config file must be specified." });
 	}
+
 	try {
 		const configContent = await fs.readFile(pathToRead, "utf-8");
 		res.json({ content: configContent });
@@ -69,23 +129,27 @@ router.get("/config/:serverName", async (req, res) => {
 	}
 });
 
-// ✅ Save a config file
+// Save a config file
 router.post("/config/:serverName", async (req, res) => {
 	const server = SERVERS_TO_QUERY.find(
 		(s) => s.name === req.params.serverName,
 	);
 	const { fileName, content } = req.body;
+
 	if (!server) {
 		return res.status(404).json({ error: "Server not found" });
 	}
+
 	let pathToWrite = server.configPaths
 		? server.configPaths[fileName]
 		: server.configPath;
+
 	if (!pathToWrite) {
 		return res
 			.status(400)
 			.json({ error: "A valid fileName must be provided." });
 	}
+
 	try {
 		await fs.copyFile(pathToWrite, `${pathToWrite}.bak`);
 		await fs.writeFile(pathToWrite, content, "utf-8");
@@ -98,10 +162,11 @@ router.post("/config/:serverName", async (req, res) => {
 	}
 });
 
-// ✅ Start or stop a server
+// Start or stop a server
 router.post("/control/:serverName/:action", async (req, res) => {
 	const { serverName, action } = req.params;
 	const server = SERVERS_TO_QUERY.find((s) => s.name === serverName);
+
 	if (!server) {
 		return res.status(404).json({ error: "Server not found" });
 	}
@@ -112,9 +177,11 @@ router.post("/control/:serverName/:action", async (req, res) => {
 				.status(400)
 				.json({ error: "Start script path is not configured." });
 		}
+
 		const command = `"${server.startScriptPath}"`;
 		const options = { cwd: server.workingDir };
-		exec(command, options, (error, stdout, stderr) => {
+
+		exec(command, options, (error) => {
 			if (error) {
 				console.error(`Exec error for ${serverName}:`, error);
 				return res.status(500).json({
@@ -136,8 +203,11 @@ router.post("/control/:serverName/:action", async (req, res) => {
 					password: server.rconPassword,
 				});
 				await rcon.connect();
+
 				const command = server.type === "minecraft" ? "stop" : "DoExit";
+
 				await rcon.send(command);
+
 				res.json({
 					success: true,
 					message: `${serverName} stop command sent via RCON.`,
@@ -152,6 +222,7 @@ router.post("/control/:serverName/:action", async (req, res) => {
 			}
 		} else if (server.processName) {
 			const command = `taskkill /IM "${server.processName}" /F`;
+
 			exec(command, (error, stdout, stderr) => {
 				if (error && !stderr.includes("not found")) {
 					console.error(`Taskkill error for ${serverName}:`, error);

@@ -30,50 +30,82 @@ function App() {
 		const joinUrl = (base, path) =>
 			`${base}/${path}`.replace(/\/+/g, "/").replace(":/", "://");
 
-		const fetchData = async () => {
+		// --- 1. Initial fetch (so UI loads instantly) ---
+		const fetchInitial = async () => {
 			try {
-				const url = joinUrl(API_BASE, "/api/status/latest");
+				const url = joinUrl(API_BASE, "/api/status");
 				const res = await fetch(url, {
 					headers: {
 						Accept: "application/json",
 						"ngrok-skip-browser-warning": "true",
-						"Access-Control-Allow-Origin": "*",
 					},
 				});
 
-				const contentType = res.headers.get("content-type");
-				if (!contentType?.includes("application/json")) {
-					const raw = await res.text();
-					console.warn("Unexpected response format:", raw);
-					throw new Error("Invalid response format: not JSON");
-				}
+				if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-				if (!res.ok) {
-					throw new Error(`HTTP ${res.status} ${res.statusText}`);
-				}
-
-				let data;
-				try {
-					data = await res.json();
-				} catch (parseErr) {
-					const raw = await res.text();
-					console.error("Failed to parse JSON. Raw response:", raw);
-					throw new Error("Invalid JSON response");
-				}
+				const data = await res.json();
 				setServers(data);
 				setApiError(null);
 			} catch (err) {
-				console.error("Error fetching data:", err);
-				setServers({});
-				setApiError(err.message || String(err));
+				console.error("Initial fetch failed:", err);
+				setApiError(err.message);
 			} finally {
 				setLoading(false);
 			}
 		};
 
-		fetchData();
-		const interval = setInterval(fetchData, 5000);
-		return () => clearInterval(interval);
+		fetchInitial();
+
+		// --- 2. SSE live updates ---
+		const eventsUrl = joinUrl(API_BASE, "/api/events");
+		const events = new EventSource(eventsUrl);
+
+		events.onmessage = (event) => {
+			if (!event.data) return;
+
+			const data = JSON.parse(event.data);
+
+			switch (data.type) {
+				case "connected":
+					console.log("SSE connected");
+					break;
+
+				case "server_update":
+					setServers((prev) => ({
+						...prev,
+						[data.serverName]: data.status,
+					}));
+					break;
+
+				case "server_added":
+					setServers((prev) => ({
+						...prev,
+						[data.serverName]: data.status,
+					}));
+					break;
+
+				case "server_removed":
+					setServers((prev) => {
+						const copy = { ...prev };
+						delete copy[data.serverName];
+						return copy;
+					});
+					break;
+
+				default:
+					console.warn("Unknown SSE event:", data);
+			}
+		};
+
+		events.onerror = (err) => {
+			console.error("SSE error:", err);
+			setApiError("Lost connection to live updates");
+		};
+
+		// Cleanup on unmount
+		return () => {
+			events.close();
+		};
 	}, []);
 
 	const navigateToConfig = (serverName) => {
