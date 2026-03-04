@@ -20,7 +20,7 @@ app.use((req, res, next) => {
 // ✅ CORS setup
 app.use(
 	cors({
-		origin: "https://vulcanie.github.io",
+		origin: "*",
 		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 		allowedHeaders: [
 			"Content-Type",
