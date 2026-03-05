@@ -135,6 +135,10 @@
   }
 }
 
+:root {
+  background-color: var(--background);
+}
+
 body {
   display: flex;
   justify-content: center;

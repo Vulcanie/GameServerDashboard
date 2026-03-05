@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-import type { GameServer, ServersResponse, WithServerName } from "./types";
+import type { GameServer, ServersResponse, WithServerName } from "../lib/types";
 
 export function useLatestStatus() {
 	const [data, setData] = useState<ServersResponse | null>(null);

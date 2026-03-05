@@ -6,7 +6,7 @@ import {
 	ConvertValheimServers,
 } from "./lib/convertServers";
 import type { ServersResponse } from "./lib/types";
-import { filterByServerType } from "./lib/useLatestStatus";
+import { filterByServerType } from "./hooks/useLatestStatus";
 
 import minecraftHeroURL from "@/assets/Minecraft_HERO.jpg";
 import valheimHeroURL from "@/assets/Valheim_HERO.jpg";
@@ -24,7 +24,7 @@ import {
 	ValheimServerListStyle,
 } from "./lib/serverConstants";
 
-export default function Servers({ response }: { response: ServersResponse }) {
+export default function Servers({ response, hideOffline }: { response: ServersResponse, hideOffline: boolean }) {
 	const arkServers = filterByServerType(response, "ark");
 	const valheimServers = filterByServerType(response, "valheim");
 	const minecraftServers = filterByServerType(response, "minecraft");
@@ -38,6 +38,7 @@ export default function Servers({ response }: { response: ServersResponse }) {
 				ServerListFields={ArkServerFields}
 				ServerListStyle={ArkServerListStyle}
 				Servers={ConvertArkServers(arkServers)}
+                hideOffline={hideOffline}
 			/>
 			<GameServer
 				title="Minecraft"
@@ -45,6 +46,7 @@ export default function Servers({ response }: { response: ServersResponse }) {
 				ServerListFields={MinecraftServerFields}
 				ServerListStyle={MinecraftServerListStyle}
 				Servers={convertMinecraftServers(minecraftServers)}
+                hideOffline={hideOffline}
 			/>
 			<GameServer
 				title="Valheim"
@@ -52,6 +54,7 @@ export default function Servers({ response }: { response: ServersResponse }) {
 				ServerListFields={ValheimServerFields}
 				ServerListStyle={ValheimServerListStyle}
 				Servers={ConvertValheimServers(valheimServers)}
+                hideOffline={hideOffline}
 			/>
 			<GameServer
 				title="Enshrouded"
@@ -59,6 +62,7 @@ export default function Servers({ response }: { response: ServersResponse }) {
 				ServerListFields={EnshroudedServerFields}
 				ServerListStyle={EnshroudedServerListStyle}
 				Servers={convertEnshroudedServers(enshroudedServers)}
+                hideOffline={hideOffline}
 			/>
 		</>
 	);

@@ -9,14 +9,26 @@ type GameServer = {
 	ServerListStyle: string;
 	ServerListFields: string[];
 	Servers: ServerT[];
+	hideOffline: boolean;
 };
 export default function GameServer({
 	title,
 	heroImg,
+	hideOffline,
 	ServerListStyle,
 	ServerListFields,
 	Servers,
 }: GameServer) {
+    let gameServers = Servers
+    
+    if (hideOffline) {
+        gameServers = Servers.filter(server => server.serverPing && server.serverPing > 0)
+
+        if (gameServers.length == 0) {
+            return <></>
+        }
+    }
+
 	return (
 		<Card className="mx-auto w-screen max-w-2xl overflow-hidden pt-0 mb-10 transition-all duration-200 hover:shadow-xl hover:shadow-blue-500/40">
 			<div className="relative aspect-video w-full">
@@ -43,10 +55,11 @@ export default function GameServer({
 						))}
 					</div>
 					<Separator />
-					{Servers.map((server, index) => (
+					{gameServers.map((server, index) => (
 						<ServerList
 							key={index}
 							containerStyle={ServerListStyle}
+							serverPing={server.serverPing}
 							serverName={server.serverName}
 							fields={server.serverFields}
 						/>

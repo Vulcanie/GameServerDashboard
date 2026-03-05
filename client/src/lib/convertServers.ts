@@ -2,6 +2,7 @@ import type {
 	ArkServer,
 	EnshroudedServer,
 	MinecraftServer,
+	ServerField,
 	ServerT,
 	ValheimServer,
 	WithServerName,
@@ -12,11 +13,12 @@ export function ConvertValheimServers(
 ): ServerT[] {
 	return servers.map((server) => ({
 		serverName: server.serverName,
+		serverPing: server.ping,
 		serverFields: [
-			server.serverName,
-			server.sessionName,
-			server.playerCount.toString(),
-			server.serverPassword,
+			f(server.serverName),
+			f(server.sessionName),
+			f(server.playerCount.toString()),
+			f(server.serverPassword, true),
 		],
 	}));
 }
@@ -26,12 +28,13 @@ export function ConvertArkServers(
 ): ServerT[] {
 	return servers.map((server) => ({
 		serverName: server.serverName,
+		serverPing: server.ping,
 		serverFields: [
-			server.serverName,
-			server.sessionName,
-			server.playerCount.toString(),
-			server.ping ? server.ping.toString() : "",
-			server.serverPassword,
+			f(server.serverName),
+			f(server.sessionName),
+			f(server.playerCount.toString()),
+			f(server.ping ? server.ping.toString() : ""),
+			f(server.serverPassword, true),
 		],
 	}));
 }
@@ -41,10 +44,11 @@ export function convertMinecraftServers(
 ): ServerT[] {
 	return servers.map((server) => ({
 		serverName: server.serverName,
+		serverPing: server.ping,
 		serverFields: [
-			server.serverName,
-			server.joinAddress,
-			server.playerCount.toString(),
+			f(server.serverName),
+			f(server.joinAddress, true),
+			f(server.playerCount.toString()),
 		],
 	}));
 }
@@ -54,11 +58,16 @@ export function convertEnshroudedServers(
 ): ServerT[] {
 	return servers.map((server) => ({
 		serverName: server.serverName,
+		serverPing: server.ping,
 		serverFields: [
-			server.serverName,
-            server.sessionName,
-            server.serverPassword,
-			server.playerCount.toString(),
+			f(server.serverName),
+            f(server.sessionName),
+            f(server.serverPassword, true),
+			f(server.playerCount.toString()),
 		],
 	}));
+}
+
+function f(input: string, isCopyable = false): ServerField {
+	return {field: input, isCopyable: isCopyable}
 }
