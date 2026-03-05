@@ -1,19 +1,25 @@
-import ArkServer from "./components/ArkServer";
-import ValheimServer from "./components/ValheimServer";
-import { filterByServerType, useLatestStatus } from "./lib/useLatestStatus";
+import { useEffect } from "react";
+import { useLatestStatus } from "./lib/useLatestStatus";
+import Servers from "./Servers";
 
 function App() {
 	const { data, loading, error } = useLatestStatus();
 
-	filterByServerType(data, "ark");
-	return (
-		<div className="flex w-full justify-center">
-			<div className="grid grid-cols-2 gap-10 w-fit items-start mt-10">
-				<ArkServer data={data} />
-				<ValheimServer data={data} />
+	useEffect(() => {}, [loading]);
+
+	if (loading) {
+		return <h1>Fetching data fron servers</h1>;
+	} else if (data) {
+		return (
+			<div>
+				<div className="columns-1 xl:columns-2 gap-10 w-fit my-10">
+					<Servers response={data} />
+				</div>
 			</div>
-		</div>
-	);
+		);
+	} else {
+		return <h1>Error data fron servers</h1>;
+	}
 }
 
 export default App;

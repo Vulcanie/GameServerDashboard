@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-import type { GameServer, ServersResponse } from "./types";
+import type { GameServer, ServersResponse, WithServerName } from "./types";
 
 export function useLatestStatus() {
 	const [data, setData] = useState<ServersResponse | null>(null);
@@ -11,7 +11,6 @@ export function useLatestStatus() {
 		async function fetchStatus() {
 			console.log("fetching data");
 			try {
-				console.log(import.meta.env.VITE_API_URL);
 				const url = new URL(
 					"/api/status/latest",
 					import.meta.env.VITE_API_URL,
@@ -23,7 +22,6 @@ export function useLatestStatus() {
 				}
 
 				const json = await res.json();
-				console.log(json);
 				setData(json);
 			} catch (err) {
 				if (err instanceof Error) {
@@ -41,7 +39,6 @@ export function useLatestStatus() {
 	return { data, loading, error };
 }
 
-type WithServerName<T> = T & { serverName: string };
 
 export function filterByServerType<T extends GameServer["type"]>(
 	servers: ServersResponse | null,

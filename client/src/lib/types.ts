@@ -35,4 +35,12 @@ export type GameServer =
   | ValheimServer
   | EnshroudedServer;
 
+export type ServerT = {
+	serverName: string;
+	serverFields: string[];
+};
+
+export type WithServerName<T> = T & { serverName: string };
+
+
 export type ServersResponse = Record<string, GameServer>;
