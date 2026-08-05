@@ -7,7 +7,6 @@ dist/
 
 # Env files
 .env
-server/.env
 client/.env
 
 # Logs
