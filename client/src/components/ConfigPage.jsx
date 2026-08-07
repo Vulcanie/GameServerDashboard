@@ -9,6 +9,11 @@ import {
 	TextareaAutosize,
 	FormControlLabel,
 	Switch,
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogContentText,
+	DialogActions,
 } from "@mui/material";
 import { ArrowBack as ArrowBackIcon } from "@mui/icons-material";
 import { grey } from "@mui/material/colors";
@@ -64,6 +69,7 @@ function ConfigPage({
 	const [message, setMessage] = React.useState("");
 	const [loading, setLoading] = React.useState(true);
 	const [viewRaw, setViewRaw] = React.useState(false);
+	const [updateDialogOpen, setUpdateDialogOpen] = React.useState(false);
 
 	// ✅ Centralized and sanitized API base
 	const API_BASE =
@@ -177,6 +183,11 @@ function ConfigPage({
 		}
 	};
 
+	const handleConfirmUpdate = () => {
+		setUpdateDialogOpen(false);
+		handleControl("update");
+	};
+
 	const currentConfigName = serverInfo?.configNames?.[activeTab];
 	const gameType = serverStatus?.type;
 	const parserType = currentConfigName
@@ -230,6 +241,30 @@ function ConfigPage({
 
 	const parseFailed = Boolean(parserDef && rawText && !parsed);
 	const showRaw = viewRaw || parseFailed;
+	const isArk = gameType === "ark";
+
+	const updateDialog = (
+		<Dialog open={updateDialogOpen} onClose={() => setUpdateDialogOpen(false)}>
+			<DialogTitle>Update {serverName}?</DialogTitle>
+			<DialogContent>
+				<DialogContentText>
+					{isArk
+						? "This will stop every ARK server sharing this install (all the ASA maps), run the SteamCMD update, and leave them stopped when it's done. You'll need to start them back up manually."
+						: "This will stop this server, run the SteamCMD update, and leave it stopped when it's done. You'll need to start it back up manually."}
+				</DialogContentText>
+			</DialogContent>
+			<DialogActions>
+				<Button onClick={() => setUpdateDialogOpen(false)}>Cancel</Button>
+				<Button
+					variant="contained"
+					color="warning"
+					onClick={handleConfirmUpdate}
+				>
+					Update
+				</Button>
+			</DialogActions>
+		</Dialog>
+	);
 
 	if (userRole !== "admin") {
 		return (
@@ -252,6 +287,7 @@ function ConfigPage({
 	if (!loading && serverInfo?.configNames?.length === 0) {
 		return (
 			<Box sx={{ mt: 4 }}>
+				{updateDialog}
 				<Box sx={{ display: "flex", gap: 2, mb: 2 }}>
 					<Button startIcon={<ArrowBackIcon />} onClick={onBack}>
 						Back to Dashboard
@@ -284,9 +320,19 @@ function ConfigPage({
 						variant="contained"
 						color="error"
 						onClick={() => handleControl("stop")}
+						sx={{ mr: serverInfo?.hasUpdate ? 2 : 0 }}
 					>
 						Stop Server
 					</Button>
+					{serverInfo?.hasUpdate && (
+						<Button
+							variant="contained"
+							color="warning"
+							onClick={() => setUpdateDialogOpen(true)}
+						>
+							Update Server
+						</Button>
+					)}
 					{message && (
 						<Typography
 							variant="body2"
@@ -307,6 +353,7 @@ function ConfigPage({
 
 	return (
 		<Box sx={{ pb: "120px" }}>
+			{updateDialog}
 			<Box sx={{ display: "flex", gap: 2, mb: 2 }}>
 				<Button startIcon={<ArrowBackIcon />} onClick={onBack}>
 					Back to Dashboard
@@ -358,6 +405,15 @@ function ConfigPage({
 						>
 							Stop Server
 						</Button>
+						{serverInfo?.hasUpdate && (
+							<Button
+								variant="contained"
+								color="warning"
+								onClick={() => setUpdateDialogOpen(true)}
+							>
+								Update Server
+							</Button>
+						)}
 						{message && (
 							<Typography
 								variant="body2"
