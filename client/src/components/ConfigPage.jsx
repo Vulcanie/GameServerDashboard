@@ -7,10 +7,49 @@ import {
 	Tabs,
 	Tab,
 	TextareaAutosize,
+	FormControlLabel,
+	Switch,
 } from "@mui/material";
 import { ArrowBack as ArrowBackIcon } from "@mui/icons-material";
 import { grey } from "@mui/material/colors";
 import StatusDisplay from "./StatusDisplay";
+import ConfigForm from "./ConfigForm";
+import { parseIni, serializeIni } from "../configParsers/ini";
+import { parseProperties, serializeProperties } from "../configParsers/properties";
+import { parseXmlProperties, serializeXmlProperties } from "../configParsers/xmlProperties";
+import {
+	parseJsonConfig,
+	serializeJsonConfig,
+	flattenJsonEntries,
+} from "../configParsers/json";
+import { parsePalworldStruct, serializePalworldStruct } from "../configParsers/palworldStruct";
+import { annotateEntries, getFileParser, getStructuredPaths } from "../configCatalog";
+import { detectSettingType } from "../utils/settingType";
+
+const PARSERS = {
+	ini: { parse: parseIni, serialize: serializeIni, getEntries: (p) => p.entries },
+	properties: {
+		parse: parseProperties,
+		serialize: serializeProperties,
+		getEntries: (p) => p.entries,
+	},
+	xml: {
+		parse: parseXmlProperties,
+		serialize: serializeXmlProperties,
+		getEntries: (p) => p.entries,
+	},
+	json: {
+		parse: parseJsonConfig,
+		serialize: serializeJsonConfig,
+		getEntries: (p, structuredPaths) =>
+			flattenJsonEntries(p, new Set(structuredPaths)),
+	},
+	palworld: {
+		parse: parsePalworldStruct,
+		serialize: serializePalworldStruct,
+		getEntries: (p) => p.entries,
+	},
+};
 
 function ConfigPage({
 	serverName,
@@ -24,6 +63,7 @@ function ConfigPage({
 	const [activeTab, setActiveTab] = React.useState(0);
 	const [message, setMessage] = React.useState("");
 	const [loading, setLoading] = React.useState(true);
+	const [viewRaw, setViewRaw] = React.useState(false);
 
 	// ✅ Centralized and sanitized API base
 	const API_BASE =
@@ -138,6 +178,58 @@ function ConfigPage({
 	};
 
 	const currentConfigName = serverInfo?.configNames?.[activeTab];
+	const gameType = serverStatus?.type;
+	const parserType = currentConfigName
+		? getFileParser(gameType, currentConfigName)
+		: null;
+	const parserDef = parserType ? PARSERS[parserType] : null;
+	const rawText = currentConfigName ? configs[currentConfigName] || "" : "";
+	const structuredPaths = React.useMemo(
+		() =>
+			currentConfigName ? getStructuredPaths(gameType, currentConfigName) : [],
+		[gameType, currentConfigName],
+	);
+
+	const parsed = React.useMemo(() => {
+		if (!parserDef || !rawText) return null;
+		try {
+			return parserDef.parse(rawText);
+		} catch (e) {
+			return null;
+		}
+	}, [parserDef, rawText]);
+
+	const groups = React.useMemo(() => {
+		if (!parsed || !parserDef || !currentConfigName) return [];
+		const entries = parserDef.getEntries(parsed, structuredPaths);
+		return annotateEntries(gameType, currentConfigName, entries).groups;
+	}, [parsed, parserDef, currentConfigName, gameType, structuredPaths]);
+
+	const handleSettingChange = (entry, rawNewValue) => {
+		if (!parserDef || !parsed || !currentConfigName) return;
+		let newValue = rawNewValue;
+		if (parserType === "json" && !entry.structured) {
+			if (entry.rawJson) {
+				try {
+					newValue = JSON.parse(rawNewValue);
+				} catch (e) {
+					newValue = rawNewValue;
+				}
+			} else {
+				const type = detectSettingType(entry.value);
+				if (type === "boolean") {
+					newValue = String(rawNewValue).toLowerCase() === "true";
+				} else if (type === "number") {
+					newValue = rawNewValue === "" ? rawNewValue : Number(rawNewValue);
+				}
+			}
+		}
+		const newText = parserDef.serialize(parsed, { [entry.id]: newValue });
+		setConfigs((prev) => ({ ...prev, [currentConfigName]: newText }));
+	};
+
+	const parseFailed = Boolean(parserDef && rawText && !parsed);
+	const showRaw = viewRaw || parseFailed;
 
 	if (userRole !== "admin") {
 		return (
@@ -288,36 +380,77 @@ function ConfigPage({
 				<CircularProgress />
 			) : (
 				<>
-					{serverInfo?.configNames?.length > 1 && (
-						<Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+					<Box
+						sx={{
+							display: "flex",
+							justifyContent: "space-between",
+							alignItems: "center",
+							borderBottom: 1,
+							borderColor: "divider",
+						}}
+					>
+						{serverInfo?.configNames?.length > 1 ? (
 							<Tabs value={activeTab} onChange={handleTabChange}>
 								{serverInfo.configNames.map((name) => (
 									<Tab label={name} key={name} />
 								))}
 							</Tabs>
+						) : (
+							<Box />
+						)}
+						{parserDef && (
+							<FormControlLabel
+								sx={{ mr: 0 }}
+								control={
+									<Switch
+										checked={showRaw}
+										disabled={parseFailed}
+										onChange={(e) => setViewRaw(e.target.checked)}
+									/>
+								}
+								label="View Raw"
+							/>
+						)}
+					</Box>
+
+					{parseFailed && (
+						<Typography variant="body2" sx={{ color: "warning.main", mt: 1 }}>
+							Couldn't parse this file into settings (it may have
+							invalid syntax) — showing raw text instead.
+						</Typography>
+					)}
+
+					{!parserDef || showRaw ? (
+						<TextareaAutosize
+							value={configs[currentConfigName] || ""}
+							onChange={(e) =>
+								setConfigs((prev) => ({
+									...prev,
+									[currentConfigName]: e.target.value,
+								}))
+							}
+							minRows={25}
+							style={{
+								width: "100%",
+								backgroundColor: "#2b2b2b",
+								color: "white",
+								fontFamily: "monospace",
+								fontSize: 14,
+								border: "1px solid #555",
+								borderRadius: 4,
+								padding: "10px",
+								marginTop: "16px",
+							}}
+						/>
+					) : groups.length === 0 ? (
+						<Typography variant="body2" sx={{ color: grey[500], mt: 2 }}>
+							No editable settings found in this file.
+						</Typography>
+					) : (
+						<Box sx={{ mt: 2 }}>
+							<ConfigForm groups={groups} onChange={handleSettingChange} />
 						</Box>
 					)}
-					<TextareaAutosize
-						value={configs[currentConfigName] || ""}
-						onChange={(e) =>
-							setConfigs((prev) => ({
-								...prev,
-								[currentConfigName]: e.target.value,
-							}))
-						}
-						minRows={25}
-						style={{
-							width: "100%",
-							backgroundColor: "#2b2b2b",
-							color: "white",
-							fontFamily: "monospace",
-							fontSize: 14,
-							border: "1px solid #555",
-							borderRadius: 4,
-							padding: "10px",
-							marginTop: "16px",
-						}}
-					/>
 				</>
 			)}
 
