@@ -19,6 +19,7 @@ import { ArrowBack as ArrowBackIcon } from "@mui/icons-material";
 import { grey } from "@mui/material/colors";
 import StatusDisplay from "./StatusDisplay";
 import ConfigForm from "./ConfigForm";
+import RconConsole from "./RconConsole";
 import { parseIni, serializeIni } from "../configParsers/ini";
 import { parseProperties, serializeProperties } from "../configParsers/properties";
 import { parseXmlProperties, serializeXmlProperties } from "../configParsers/xmlProperties";
@@ -74,6 +75,7 @@ function ConfigPage({
 	// ✅ Centralized and sanitized API base
 	const API_BASE =
 		process.env.REACT_APP_API_URL?.trim().replace(/\/+$/, "") || "";
+	const API_KEY = process.env.REACT_APP_API_KEY;
 	const joinUrl = (base, path) =>
 		`${base}/${path}`.replace(/\/+/g, "/").replace(":/", "://");
 
@@ -147,6 +149,7 @@ function ConfigPage({
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
+						"x-api-key": API_KEY,
 						"ngrok-skip-browser-warning": "true",
 						"Access-Control-Allow-Origin": "*",
 					},
@@ -171,6 +174,7 @@ function ConfigPage({
 				{
 					method: "POST",
 					headers: {
+						"x-api-key": API_KEY,
 						"ngrok-skip-browser-warning": "true",
 						"Access-Control-Allow-Origin": "*",
 					},
@@ -346,6 +350,9 @@ function ConfigPage({
 						</Typography>
 					)}
 				</Box>
+				{serverInfo?.hasRcon && (
+					<RconConsole apiBase={API_BASE} serverName={serverName} />
+				)}
 				<StatusDisplay serverStatus={serverStatus} />
 			</Box>
 		);
@@ -431,6 +438,10 @@ function ConfigPage({
 
 				<StatusDisplay serverStatus={serverStatus} />
 			</Box>
+
+			{serverInfo?.hasRcon && (
+				<RconConsole apiBase={API_BASE} serverName={serverName} />
+			)}
 
 			{loading ? (
 				<CircularProgress />
