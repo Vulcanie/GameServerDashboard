@@ -70,7 +70,8 @@ function ConfigPage({
 	const [message, setMessage] = React.useState("");
 	const [loading, setLoading] = React.useState(true);
 	const [viewRaw, setViewRaw] = React.useState(false);
-	const [updateDialogOpen, setUpdateDialogOpen] = React.useState(false);
+	// null (closed), "update", or "reboot"
+	const [updateDialogMode, setUpdateDialogMode] = React.useState(null);
 
 	// ✅ Centralized and sanitized API base
 	const API_BASE =
@@ -188,8 +189,9 @@ function ConfigPage({
 	};
 
 	const handleConfirmUpdate = () => {
-		setUpdateDialogOpen(false);
-		handleControl("update");
+		const action = updateDialogMode === "reboot" ? "update-reboot" : "update";
+		setUpdateDialogMode(null);
+		handleControl(action);
 	};
 
 	const currentConfigName = serverInfo?.configNames?.[activeTab];
@@ -247,24 +249,35 @@ function ConfigPage({
 	const showRaw = viewRaw || parseFailed;
 	const isArk = gameType === "ark";
 
+	const isReboot = updateDialogMode === "reboot";
+	const updateScope = isArk
+		? "every ARK server sharing this install (all the ASA maps)"
+		: "this server";
+	const updateAfterward = isReboot
+		? `then start ${isArk ? "them" : "it"} back up automatically once the update finishes`
+		: `and leave ${isArk ? "them" : "it"} stopped when it's done — you'll need to start ${isArk ? "them" : "it"} back up manually`;
+
 	const updateDialog = (
-		<Dialog open={updateDialogOpen} onClose={() => setUpdateDialogOpen(false)}>
-			<DialogTitle>Update {serverName}?</DialogTitle>
+		<Dialog
+			open={updateDialogMode !== null}
+			onClose={() => setUpdateDialogMode(null)}
+		>
+			<DialogTitle>
+				{isReboot ? "Update & reboot" : "Update"} {serverName}?
+			</DialogTitle>
 			<DialogContent>
 				<DialogContentText>
-					{isArk
-						? "This will stop every ARK server sharing this install (all the ASA maps), run the SteamCMD update, and leave them stopped when it's done. You'll need to start them back up manually."
-						: "This will stop this server, run the SteamCMD update, and leave it stopped when it's done. You'll need to start it back up manually."}
+					This will stop {updateScope}, run the SteamCMD update, {updateAfterward}.
 				</DialogContentText>
 			</DialogContent>
 			<DialogActions>
-				<Button onClick={() => setUpdateDialogOpen(false)}>Cancel</Button>
+				<Button onClick={() => setUpdateDialogMode(null)}>Cancel</Button>
 				<Button
 					variant="contained"
 					color="warning"
 					onClick={handleConfirmUpdate}
 				>
-					Update
+					{isReboot ? "Update & Reboot" : "Update"}
 				</Button>
 			</DialogActions>
 		</Dialog>
@@ -329,13 +342,23 @@ function ConfigPage({
 						Stop Server
 					</Button>
 					{serverInfo?.hasUpdate && (
-						<Button
-							variant="contained"
-							color="warning"
-							onClick={() => setUpdateDialogOpen(true)}
-						>
-							Update Server
-						</Button>
+						<>
+							<Button
+								variant="contained"
+								color="warning"
+								onClick={() => setUpdateDialogMode("update")}
+								sx={{ mr: 2 }}
+							>
+								Update Server
+							</Button>
+							<Button
+								variant="contained"
+								color="warning"
+								onClick={() => setUpdateDialogMode("reboot")}
+							>
+								Update and Reboot
+							</Button>
+						</>
 					)}
 					{message && (
 						<Typography
@@ -413,13 +436,22 @@ function ConfigPage({
 							Stop Server
 						</Button>
 						{serverInfo?.hasUpdate && (
-							<Button
-								variant="contained"
-								color="warning"
-								onClick={() => setUpdateDialogOpen(true)}
-							>
-								Update Server
-							</Button>
+							<>
+								<Button
+									variant="contained"
+									color="warning"
+									onClick={() => setUpdateDialogMode("update")}
+								>
+									Update Server
+								</Button>
+								<Button
+									variant="contained"
+									color="warning"
+									onClick={() => setUpdateDialogMode("reboot")}
+								>
+									Update and Reboot
+								</Button>
+							</>
 						)}
 						{message && (
 							<Typography
