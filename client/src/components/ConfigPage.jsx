@@ -72,6 +72,8 @@ function ConfigPage({
 	const [viewRaw, setViewRaw] = React.useState(false);
 	// null (closed), "update", or "reboot"
 	const [updateDialogMode, setUpdateDialogMode] = React.useState(null);
+	const [autoUpdateEnabled, setAutoUpdateEnabled] = React.useState(false);
+	const [autoUpdateBusy, setAutoUpdateBusy] = React.useState(false);
 
 	// ✅ Centralized and sanitized API base
 	const API_BASE =
@@ -97,6 +99,7 @@ function ConfigPage({
 				if (!infoRes.ok) throw new Error("Failed to fetch server info");
 				const infoData = await infoRes.json();
 				setServerInfo(infoData);
+				setAutoUpdateEnabled(Boolean(infoData.autoUpdateEnabled));
 
 				if (infoData.configNames && infoData.configNames.length > 0) {
 					const newConfigs = {};
@@ -185,6 +188,39 @@ function ConfigPage({
 			setMessage(data.message || data.error);
 		} catch (err) {
 			setMessage("Failed to send control command.");
+		}
+	};
+
+	const handleToggleAutoUpdate = async () => {
+		const next = !autoUpdateEnabled;
+		setAutoUpdateBusy(true);
+		try {
+			const res = await fetch(
+				joinUrl(API_BASE, `/api/server/${serverName}/auto-update`),
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						"x-api-key": API_KEY,
+						"ngrok-skip-browser-warning": "true",
+						"Access-Control-Allow-Origin": "*",
+					},
+					body: JSON.stringify({ enabled: next }),
+				},
+			);
+			const data = await res.json();
+			if (data.success) {
+				setAutoUpdateEnabled(data.autoUpdateEnabled);
+				setMessage(
+					`Auto-update turned ${data.autoUpdateEnabled ? "on" : "off"} for ${serverName}.`,
+				);
+			} else {
+				setMessage(data.error || "Failed to change auto-update setting.");
+			}
+		} catch (err) {
+			setMessage("Failed to send auto-update toggle request.");
+		} finally {
+			setAutoUpdateBusy(false);
 		}
 	};
 
@@ -355,8 +391,17 @@ function ConfigPage({
 								variant="contained"
 								color="warning"
 								onClick={() => setUpdateDialogMode("reboot")}
+								sx={{ mr: 2 }}
 							>
 								Update and Reboot
+							</Button>
+							<Button
+								variant={autoUpdateEnabled ? "contained" : "outlined"}
+								color={autoUpdateEnabled ? "success" : "inherit"}
+								disabled={autoUpdateBusy}
+								onClick={handleToggleAutoUpdate}
+							>
+								Auto-Update: {autoUpdateEnabled ? "ON" : "OFF"}
 							</Button>
 						</>
 					)}
@@ -450,6 +495,14 @@ function ConfigPage({
 									onClick={() => setUpdateDialogMode("reboot")}
 								>
 									Update and Reboot
+								</Button>
+								<Button
+									variant={autoUpdateEnabled ? "contained" : "outlined"}
+									color={autoUpdateEnabled ? "success" : "inherit"}
+									disabled={autoUpdateBusy}
+									onClick={handleToggleAutoUpdate}
+								>
+									Auto-Update: {autoUpdateEnabled ? "ON" : "OFF"}
 								</Button>
 							</>
 						)}
