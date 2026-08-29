@@ -290,7 +290,9 @@ function ConfigPage({
 		? "every ARK server sharing this install (all the ASA maps)"
 		: "this server";
 	const updateAfterward = isReboot
-		? `then start ${isArk ? "them" : "it"} back up automatically once the update finishes`
+		? isArk
+			? "then start whichever of them were actually running back up automatically once the update finishes (any that were already stopped stay stopped)"
+			: "then start it back up automatically once the update finishes"
 		: `and leave ${isArk ? "them" : "it"} stopped when it's done — you'll need to start ${isArk ? "them" : "it"} back up manually`;
 
 	const updateDialog = (
