@@ -4,8 +4,10 @@ import {
 	Typography,
 	FormControlLabel,
 	Switch,
+	Button,
 	CircularProgress,
 } from "@mui/material";
+import { Add as AddIcon } from "@mui/icons-material";
 import { grey } from "@mui/material/colors";
 import GameCard from "./GameCard";
 
@@ -21,7 +23,14 @@ function groupByType(servers) {
 }
 
 // This component displays the main grid of game cards, each listing its server instances.
-function DashboardPage({ servers, loading, onNavigate, apiError, userRole }) {
+function DashboardPage({
+	servers,
+	loading,
+	onNavigate,
+	onCreateServer,
+	apiError,
+	userRole,
+}) {
 	const [showOffline, setShowOffline] = React.useState(true);
 
 	const groups = groupByType(servers);
@@ -41,7 +50,25 @@ function DashboardPage({ servers, loading, onNavigate, apiError, userRole }) {
 				Live updates enabled (SSE)
 			</Typography>
 
-			<Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+			<Box
+				sx={{
+					display: "flex",
+					justifyContent: "flex-end",
+					alignItems: "center",
+					gap: 2,
+					mb: 2,
+				}}
+			>
+				{userRole === "admin" && (
+					<Button
+						variant="contained"
+						color="success"
+						startIcon={<AddIcon />}
+						onClick={onCreateServer}
+					>
+						Create Server
+					</Button>
+				)}
 				<FormControlLabel
 					control={
 						<Switch

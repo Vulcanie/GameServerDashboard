@@ -10,6 +10,7 @@ import DashboardPage from "./components/DashboardPage";
 import ConfigPage from "./components/ConfigPage";
 import LoginPage from "./components/LoginPage";
 import BatchFileEditor from "./components/BatchFileEditor";
+import CreateServerPage from "./components/CreateServerPage";
 
 // ✅ Centralized API base URL
 const API_BASE =
@@ -122,6 +123,10 @@ function App() {
 		setPage("batchEditor");
 	};
 
+	const navigateToCreateServer = () => {
+		setPage("createServer");
+	};
+
 	const selectedServerData = servers[selectedServer] || null;
 
 	if (!userRole) {
@@ -151,9 +156,12 @@ function App() {
 						servers={servers}
 						loading={loading}
 						onNavigate={navigateToConfig}
+						onCreateServer={navigateToCreateServer}
 						apiError={apiError}
 						userRole={userRole}
 					/>
+				) : page === "createServer" ? (
+					<CreateServerPage onBack={navigateToDashboard} userRole={userRole} />
 				) : page === "config" ? (
 					<ConfigPage
 						serverName={selectedServer}
