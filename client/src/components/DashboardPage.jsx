@@ -57,9 +57,10 @@ function DashboardPage({
 			<Box
 				sx={{
 					display: "flex",
+					flexWrap: "wrap",
 					justifyContent: "flex-end",
 					alignItems: "center",
-					gap: 2,
+					gap: { xs: 1, sm: 2 },
 					mb: 2,
 				}}
 			>
@@ -90,8 +91,9 @@ function DashboardPage({
 				<Box
 					sx={{
 						display: "grid",
-						gap: 3,
-						gridTemplateColumns: "repeat(auto-fit, minmax(460px, 1fr))",
+						gap: { xs: 2, sm: 3 },
+						gridTemplateColumns:
+							"repeat(auto-fit, minmax(min(460px, 100%), 1fr))",
 					}}
 				>
 					{gameTypes.map((type) => (

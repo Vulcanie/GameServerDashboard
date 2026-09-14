@@ -187,7 +187,7 @@ function CreateServerPage({ onBack, userRole, authToken }) {
 				) : (
 					<Grid container spacing={2} sx={{ mt: 1 }}>
 						{templates.map((t) => (
-							<Grid item xs={12} sm={6} md={4} key={t.id}>
+							<Grid size={{ xs: 12, sm: 6, md: 4 }} key={t.id}>
 								<Card>
 									<CardActionArea onClick={() => pickTemplate(t)}>
 										<CardContent>

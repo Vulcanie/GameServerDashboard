@@ -5,6 +5,7 @@ import {
 	Table,
 	TableBody,
 	TableCell,
+	TableContainer,
 	TableHead,
 	TableRow,
 	Typography,
@@ -108,69 +109,74 @@ function GameCard({ gameType, instances, onNavigate, userRole, showOffline }) {
 				</Typography>
 			</Box>
 
-			<Table size="small">
-				<TableHead>
-					<TableRow>
-						<TableCell sx={{ color: grey[500] }}>Name</TableCell>
-						{hasSession && (
-							<TableCell sx={{ color: grey[500] }}>Session</TableCell>
-						)}
-						{hasIp && <TableCell sx={{ color: grey[500] }}>IP</TableCell>}
-						<TableCell sx={{ color: grey[500] }}>Players</TableCell>
-						{hasPing && (
-							<TableCell sx={{ color: grey[500] }}>Ping</TableCell>
-						)}
-						{hasPassword && (
-							<TableCell sx={{ color: grey[500] }}>Password</TableCell>
-						)}
-					</TableRow>
-				</TableHead>
-				<TableBody>
-					{rows.map((srv) => (
-						<TableRow
-							key={srv.name}
-							hover={clickable}
-							onClick={
-								clickable ? () => onNavigate(srv.name) : undefined
-							}
-							sx={{
-								cursor: clickable ? "pointer" : "default",
-								opacity: srv.online ? 1 : 0.6,
-								"&:last-child td": { border: 0 },
-							}}
-						>
-							<TableCell>
-								<Box sx={{ display: "flex", alignItems: "center" }}>
-									<StatusDot online={srv.online} />
-									{srv.name}
-								</Box>
-							</TableCell>
+			<TableContainer sx={{ overflowX: "auto" }}>
+				<Table
+					size="small"
+					sx={{ "& .MuiTableCell-root": { px: { xs: 1, sm: 2 } } }}
+				>
+					<TableHead>
+						<TableRow>
+							<TableCell sx={{ color: grey[500] }}>Name</TableCell>
 							{hasSession && (
-								<TableCell>{srv.sessionName || "—"}</TableCell>
+								<TableCell sx={{ color: grey[500] }}>Session</TableCell>
 							)}
-							{hasIp && <TableCell>{srv.joinAddress || "—"}</TableCell>}
-							<TableCell>
-								{srv.playerCount ?? 0}
-								{srv.maxplayers ? ` / ${srv.maxplayers}` : ""}
-							</TableCell>
+							{hasIp && <TableCell sx={{ color: grey[500] }}>IP</TableCell>}
+							<TableCell sx={{ color: grey[500] }}>Players</TableCell>
 							{hasPing && (
-								<TableCell>
-									{srv.online && srv.ping != null ? `${srv.ping} ms` : "—"}
-								</TableCell>
+								<TableCell sx={{ color: grey[500] }}>Ping</TableCell>
 							)}
 							{hasPassword && (
-								<TableCell>
-									{srv.serverPassword ? (
-										<CopyableText text={srv.serverPassword} />
-									) : (
-										"—"
-									)}
-								</TableCell>
+								<TableCell sx={{ color: grey[500] }}>Password</TableCell>
 							)}
 						</TableRow>
-					))}
-				</TableBody>
-			</Table>
+					</TableHead>
+					<TableBody>
+						{rows.map((srv) => (
+							<TableRow
+								key={srv.name}
+								hover={clickable}
+								onClick={
+									clickable ? () => onNavigate(srv.name) : undefined
+								}
+								sx={{
+									cursor: clickable ? "pointer" : "default",
+									opacity: srv.online ? 1 : 0.6,
+									"&:last-child td": { border: 0 },
+								}}
+							>
+								<TableCell>
+									<Box sx={{ display: "flex", alignItems: "center" }}>
+										<StatusDot online={srv.online} />
+										{srv.name}
+									</Box>
+								</TableCell>
+								{hasSession && (
+									<TableCell>{srv.sessionName || "—"}</TableCell>
+								)}
+								{hasIp && <TableCell>{srv.joinAddress || "—"}</TableCell>}
+								<TableCell>
+									{srv.playerCount ?? 0}
+									{srv.maxplayers ? ` / ${srv.maxplayers}` : ""}
+								</TableCell>
+								{hasPing && (
+									<TableCell>
+										{srv.online && srv.ping != null ? `${srv.ping} ms` : "—"}
+									</TableCell>
+								)}
+								{hasPassword && (
+									<TableCell>
+										{srv.serverPassword ? (
+											<CopyableText text={srv.serverPassword} />
+										) : (
+											"—"
+										)}
+									</TableCell>
+								)}
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</TableContainer>
 		</Card>
 	);
 }

@@ -159,7 +159,7 @@ function ConfigForm({ groups, onChange }) {
 											flexWrap: "wrap",
 										}}
 									>
-										<Box sx={{ flex: "0 0 300px" }}>
+										<Box sx={{ flex: { xs: "1 1 100%", sm: "0 0 300px" } }}>
 											<Typography variant="body2">{entry.label}</Typography>
 											{entry.description && (
 												<Typography

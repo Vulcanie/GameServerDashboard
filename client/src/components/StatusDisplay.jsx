@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Card, CardContent, Typography, Chip } from "@mui/material";
+import { Card, CardContent, Typography, Chip } from "@mui/material";
 import { green, red } from "@mui/material/colors";
 
 // This component displays the live status of a server on the config page.
@@ -11,7 +11,7 @@ function StatusDisplay({ serverStatus }) {
 	const isOnline = serverStatus.online;
 
 	return (
-		<Card sx={{ minWidth: 240 }}>
+		<Card sx={{ width: { xs: "100%", md: 240 } }}>
 			<CardContent>
 				<Typography variant="h6" gutterBottom>
 					Live Status

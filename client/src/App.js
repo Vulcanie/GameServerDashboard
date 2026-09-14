@@ -210,17 +210,21 @@ function App() {
 	return (
 		<ThemeProvider theme={darkTheme}>
 			<CssBaseline />
-			<Container sx={{ mt: 4, mb: 4 }}>
-				<Box sx={{ position: "relative", mb: 1 }}>
-					<Typography variant="h3" align="center" gutterBottom>
+			<Container sx={{ mt: { xs: 2, sm: 4 }, mb: { xs: 2, sm: 4 } }}>
+				<Box
+					sx={{
+						display: "flex",
+						flexDirection: { xs: "column", sm: "row" },
+						justifyContent: "space-between",
+						alignItems: "center",
+						gap: 1,
+						mb: 2,
+					}}
+				>
+					<Typography variant="h3" gutterBottom sx={{ mb: 0 }}>
 						GodlyHeroes Server Dashboard
 					</Typography>
-					<Button
-						variant="outlined"
-						size="small"
-						onClick={logout}
-						sx={{ position: "absolute", top: 8, right: 0 }}
-					>
+					<Button variant="outlined" size="small" onClick={logout}>
 						Logout
 					</Button>
 				</Box>

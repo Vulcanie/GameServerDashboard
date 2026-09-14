@@ -362,12 +362,19 @@ function ConfigPage({
 				<Typography variant="h5" color="info.main">
 					This server does not have any editable config files.
 				</Typography>
-				<Box sx={{ mt: 3 }}>
+				<Box
+					sx={{
+						display: "flex",
+						flexWrap: "wrap",
+						gap: 2,
+						mt: 3,
+						alignItems: "center",
+					}}
+				>
 					<Button
 						variant="contained"
 						color="success"
 						onClick={() => handleControl("start")}
-						sx={{ mr: 2 }}
 					>
 						Start Server
 					</Button>
@@ -375,7 +382,6 @@ function ConfigPage({
 						variant="contained"
 						color="error"
 						onClick={() => handleControl("stop")}
-						sx={{ mr: serverInfo?.hasUpdate ? 2 : 0 }}
 					>
 						Stop Server
 					</Button>
@@ -385,7 +391,6 @@ function ConfigPage({
 								variant="contained"
 								color="warning"
 								onClick={() => setUpdateDialogMode("update")}
-								sx={{ mr: 2 }}
 							>
 								Update Server
 							</Button>
@@ -393,7 +398,6 @@ function ConfigPage({
 								variant="contained"
 								color="warning"
 								onClick={() => setUpdateDialogMode("reboot")}
-								sx={{ mr: 2 }}
 							>
 								Update and Reboot
 							</Button>
@@ -412,7 +416,6 @@ function ConfigPage({
 							variant="body2"
 							sx={{
 								color: grey[400],
-								mt: 2,
 								fontStyle: "italic",
 							}}
 						>
@@ -450,18 +453,21 @@ function ConfigPage({
 			<Box
 				sx={{
 					display: "flex",
+					flexDirection: { xs: "column", md: "row" },
 					justifyContent: "space-between",
-					alignItems: "flex-start",
+					alignItems: { xs: "stretch", md: "flex-start" },
+					gap: 2,
 					mb: 2,
 				}}
 			>
-				<Box>
+				<Box sx={{ minWidth: 0 }}>
 					<Typography variant="h4">
 						{serverName} - Configuration
 					</Typography>
 					<Box
 						sx={{
 							display: "flex",
+							flexWrap: "wrap",
 							gap: 2,
 							my: 2,
 							alignItems: "center",
@@ -537,14 +543,22 @@ function ConfigPage({
 					<Box
 						sx={{
 							display: "flex",
+							flexWrap: "wrap",
 							justifyContent: "space-between",
 							alignItems: "center",
+							gap: 1,
 							borderBottom: 1,
 							borderColor: "divider",
 						}}
 					>
 						{serverInfo?.configNames?.length > 1 ? (
-							<Tabs value={activeTab} onChange={handleTabChange}>
+							<Tabs
+								value={activeTab}
+								onChange={handleTabChange}
+								variant="scrollable"
+								scrollButtons="auto"
+								sx={{ minHeight: 0, maxWidth: "100%" }}
+							>
 								{serverInfo.configNames.map((name) => (
 									<Tab label={name} key={name} />
 								))}
