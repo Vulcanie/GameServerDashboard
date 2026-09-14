@@ -21,6 +21,7 @@ function App() {
 	const [page, setPage] = React.useState("dashboard");
 	const [selectedServer, setSelectedServer] = React.useState(null);
 	const [servers, setServers] = React.useState({});
+	const [systemStats, setSystemStats] = React.useState(null);
 	const [apiError, setApiError] = React.useState(null);
 	const [loading, setLoading] = React.useState(true);
 	const [userRole, setUserRole] = React.useState(() => {
@@ -57,6 +58,26 @@ function App() {
 
 		fetchInitial();
 
+		// --- 1b. Initial system-stats fetch ---
+		const fetchSystemStats = async () => {
+			try {
+				const url = joinUrl(API_BASE, "/api/system-stats");
+				const res = await fetch(url, {
+					headers: {
+						Accept: "application/json",
+						"ngrok-skip-browser-warning": "true",
+					},
+				});
+				if (!res.ok) throw new Error(`HTTP ${res.status}`);
+				const data = await res.json();
+				if (data.totalMemMB != null) setSystemStats(data);
+			} catch (err) {
+				console.error("Initial system-stats fetch failed:", err);
+			}
+		};
+
+		fetchSystemStats();
+
 		// --- 2. SSE live updates ---
 		const eventsUrl = joinUrl(API_BASE, "/api/events");
 		const events = new EventSource(eventsUrl);
@@ -91,6 +112,10 @@ function App() {
 						delete copy[data.serverName];
 						return copy;
 					});
+					break;
+
+				case "system_stats":
+					setSystemStats(data.stats);
 					break;
 
 				default:
@@ -154,6 +179,7 @@ function App() {
 				{page === "dashboard" ? (
 					<DashboardPage
 						servers={servers}
+						systemStats={systemStats}
 						loading={loading}
 						onNavigate={navigateToConfig}
 						onCreateServer={navigateToCreateServer}

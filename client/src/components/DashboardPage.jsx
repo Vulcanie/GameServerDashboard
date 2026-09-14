@@ -10,6 +10,7 @@ import {
 import { Add as AddIcon } from "@mui/icons-material";
 import { grey } from "@mui/material/colors";
 import GameCard from "./GameCard";
+import SystemStatsBar from "./SystemStatsBar";
 
 // Groups the flat servers map into { [type]: [{name, ...status}] }
 function groupByType(servers) {
@@ -25,6 +26,7 @@ function groupByType(servers) {
 // This component displays the main grid of game cards, each listing its server instances.
 function DashboardPage({
 	servers,
+	systemStats,
 	loading,
 	onNavigate,
 	onCreateServer,
@@ -49,6 +51,8 @@ function DashboardPage({
 			<Typography align="center" sx={{ color: grey[500], mb: 2 }}>
 				Live updates enabled (SSE)
 			</Typography>
+
+			<SystemStatsBar stats={systemStats} />
 
 			<Box
 				sx={{
