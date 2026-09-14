@@ -3,7 +3,7 @@ import { Box, Typography, TextField, Button, Paper } from "@mui/material";
 
 const API_BASE = process.env.REACT_APP_API_URL || "";
 
-export default function BatchFileEditor({ serverName, onBack }) {
+export default function BatchFileEditor({ serverName, onBack, authToken }) {
 	const [content, setContent] = useState("");
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
@@ -33,16 +33,13 @@ export default function BatchFileEditor({ serverName, onBack }) {
 			.finally(() => setLoading(false));
 	}, [serverName]);
 
-	const API_KEY = process.env.REACT_APP_API_KEY;
-
 	const saveBatchFile = () => {
 		fetch(`${API_BASE}/api/batch-files/by-server/${serverName}`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 				"ngrok-skip-browser-warning": "true",
-				"x-api-key": API_KEY, // ✅ Add this line
-				Authorization: `Bearer ${API_KEY}`, // ✅ Add this line
+				Authorization: `Bearer ${authToken}`,
 			},
 			body: JSON.stringify({ content }),
 		})

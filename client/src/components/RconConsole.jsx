@@ -2,9 +2,7 @@ import React from "react";
 import { Box, Typography, TextField, Button } from "@mui/material";
 import { grey } from "@mui/material/colors";
 
-const API_KEY = process.env.REACT_APP_API_KEY;
-
-function RconConsole({ apiBase, serverName }) {
+function RconConsole({ apiBase, serverName, authToken }) {
 	const [command, setCommand] = React.useState("");
 	const [log, setLog] = React.useState([]);
 	const [sending, setSending] = React.useState(false);
@@ -21,7 +19,7 @@ function RconConsole({ apiBase, serverName }) {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
-						"x-api-key": API_KEY,
+						Authorization: `Bearer ${authToken}`,
 						"ngrok-skip-browser-warning": "true",
 					},
 					body: JSON.stringify({ command: cmd }),

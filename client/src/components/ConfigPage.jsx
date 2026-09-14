@@ -62,6 +62,7 @@ function ConfigPage({
 	serverStatus,
 	onBack,
 	userRole,
+	authToken,
 	onEditBatchFiles,
 }) {
 	const [serverInfo, setServerInfo] = React.useState(null);
@@ -78,7 +79,6 @@ function ConfigPage({
 	// ✅ Centralized and sanitized API base
 	const API_BASE =
 		process.env.REACT_APP_API_URL?.trim().replace(/\/+$/, "") || "";
-	const API_KEY = process.env.REACT_APP_API_KEY;
 	const joinUrl = (base, path) =>
 		`${base}/${path}`.replace(/\/+/g, "/").replace(":/", "://");
 
@@ -153,7 +153,7 @@ function ConfigPage({
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
-						"x-api-key": API_KEY,
+						Authorization: `Bearer ${authToken}`,
 						"ngrok-skip-browser-warning": "true",
 						"Access-Control-Allow-Origin": "*",
 					},
@@ -178,7 +178,7 @@ function ConfigPage({
 				{
 					method: "POST",
 					headers: {
-						"x-api-key": API_KEY,
+						Authorization: `Bearer ${authToken}`,
 						"ngrok-skip-browser-warning": "true",
 						"Access-Control-Allow-Origin": "*",
 					},
@@ -201,7 +201,7 @@ function ConfigPage({
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
-						"x-api-key": API_KEY,
+						Authorization: `Bearer ${authToken}`,
 						"ngrok-skip-browser-warning": "true",
 						"Access-Control-Allow-Origin": "*",
 					},
@@ -421,7 +421,7 @@ function ConfigPage({
 					)}
 				</Box>
 				{serverInfo?.hasRcon && (
-					<RconConsole apiBase={API_BASE} serverName={serverName} />
+					<RconConsole apiBase={API_BASE} serverName={serverName} authToken={authToken} />
 				)}
 				<StatusDisplay serverStatus={serverStatus} />
 			</Box>
@@ -527,7 +527,7 @@ function ConfigPage({
 			</Box>
 
 			{serverInfo?.hasRcon && (
-				<RconConsole apiBase={API_BASE} serverName={serverName} />
+				<RconConsole apiBase={API_BASE} serverName={serverName} authToken={authToken} />
 			)}
 
 			{loading ? (

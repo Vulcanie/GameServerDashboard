@@ -27,6 +27,9 @@ function App() {
 	const [userRole, setUserRole] = React.useState(() => {
 		return localStorage.getItem("userRole") || null;
 	});
+	const [authToken, setAuthToken] = React.useState(() => {
+		return localStorage.getItem("authToken") || null;
+	});
 
 	React.useEffect(() => {
 		const joinUrl = (base, path) =>
@@ -159,9 +162,11 @@ function App() {
 			<ThemeProvider theme={darkTheme}>
 				<CssBaseline />
 				<LoginPage
-					onLogin={(role) => {
+					onLogin={(role, token) => {
 						setUserRole(role);
+						setAuthToken(token);
 						localStorage.setItem("userRole", role);
+						localStorage.setItem("authToken", token);
 					}}
 				/>
 			</ThemeProvider>
@@ -187,19 +192,25 @@ function App() {
 						userRole={userRole}
 					/>
 				) : page === "createServer" ? (
-					<CreateServerPage onBack={navigateToDashboard} userRole={userRole} />
+					<CreateServerPage
+						onBack={navigateToDashboard}
+						userRole={userRole}
+						authToken={authToken}
+					/>
 				) : page === "config" ? (
 					<ConfigPage
 						serverName={selectedServer}
 						serverStatus={selectedServerData}
 						onBack={navigateToDashboard}
 						userRole={userRole}
+						authToken={authToken}
 						onEditBatchFiles={navigateToBatchEditor} // ✅ Pass handler
 					/>
 				) : page === "batchEditor" ? (
 					<BatchFileEditor
 						serverName={selectedServer}
 						onBack={navigateToConfig}
+						authToken={authToken}
 					/>
 				) : null}
 			</Container>

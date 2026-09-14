@@ -27,10 +27,9 @@ const FIELD_LABELS = {
 // Poll cadence while a creation job is running.
 const POLL_MS = 4000;
 
-function CreateServerPage({ onBack, userRole }) {
+function CreateServerPage({ onBack, userRole, authToken }) {
 	const API_BASE =
 		process.env.REACT_APP_API_URL?.trim().replace(/\/+$/, "") || "";
-	const API_KEY = process.env.REACT_APP_API_KEY;
 	const joinUrl = (base, path) =>
 		`${base}/${path}`.replace(/\/+/g, "/").replace(":/", "://");
 
@@ -112,7 +111,7 @@ function CreateServerPage({ onBack, userRole }) {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
-					"x-api-key": API_KEY,
+					Authorization: `Bearer ${authToken}`,
 					"ngrok-skip-browser-warning": "true",
 				},
 				body: JSON.stringify(body),
