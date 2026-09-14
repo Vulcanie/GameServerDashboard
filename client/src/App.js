@@ -4,6 +4,8 @@ import {
 	Typography,
 	ThemeProvider,
 	CssBaseline,
+	Box,
+	Button,
 } from "@mui/material";
 import { darkTheme } from "./theme";
 import DashboardPage from "./components/DashboardPage";
@@ -11,6 +13,13 @@ import ConfigPage from "./components/ConfigPage";
 import LoginPage from "./components/LoginPage";
 import BatchFileEditor from "./components/BatchFileEditor";
 import CreateServerPage from "./components/CreateServerPage";
+import { isTokenExpired } from "./utils/authToken";
+
+// How often to re-check the stored token while the app stays open, so a
+// session that goes stale mid-visit (rather than just between visits)
+// still gets logged out on its own rather than sitting there looking
+// valid until the next write fails.
+const SESSION_CHECK_MS = 5 * 60_000;
 
 // ✅ Centralized API base URL
 const API_BASE =
@@ -30,6 +39,31 @@ function App() {
 	const [authToken, setAuthToken] = React.useState(() => {
 		return localStorage.getItem("authToken") || null;
 	});
+
+	const logout = React.useCallback(() => {
+		setUserRole(null);
+		setAuthToken(null);
+		localStorage.removeItem("userRole");
+		localStorage.removeItem("authToken");
+	}, []);
+
+	// Catches a session that's gone stale — on load (closed the tab for
+	// weeks and the 30-day token finally expired) and periodically while
+	// the app stays open (expires mid-visit). Client-side expiry check
+	// only, for UX; the server independently rejects an invalid token on
+	// every write regardless of what this decides.
+	React.useEffect(() => {
+		if (authToken && isTokenExpired(authToken)) {
+			logout();
+			return;
+		}
+
+		const interval = setInterval(() => {
+			if (authToken && isTokenExpired(authToken)) logout();
+		}, SESSION_CHECK_MS);
+
+		return () => clearInterval(interval);
+	}, [authToken, logout]);
 
 	React.useEffect(() => {
 		const joinUrl = (base, path) =>
@@ -177,9 +211,19 @@ function App() {
 		<ThemeProvider theme={darkTheme}>
 			<CssBaseline />
 			<Container sx={{ mt: 4, mb: 4 }}>
-				<Typography variant="h3" align="center" gutterBottom>
-					GodlyHeroes Server Dashboard
-				</Typography>
+				<Box sx={{ position: "relative", mb: 1 }}>
+					<Typography variant="h3" align="center" gutterBottom>
+						GodlyHeroes Server Dashboard
+					</Typography>
+					<Button
+						variant="outlined"
+						size="small"
+						onClick={logout}
+						sx={{ position: "absolute", top: 8, right: 0 }}
+					>
+						Logout
+					</Button>
+				</Box>
 
 				{page === "dashboard" ? (
 					<DashboardPage
