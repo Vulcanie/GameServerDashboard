@@ -57,7 +57,14 @@ function CopyableText({ text }) {
 	);
 }
 
-function GameCard({ gameType, instances, onNavigate, userRole, showOffline }) {
+function GameCard({
+	gameType,
+	instances,
+	onNavigate,
+	userRole,
+	showOffline,
+	serverStats,
+}) {
 	const { title, banner, gradient } = getGameInfo(gameType);
 
 	const rows = showOffline
@@ -70,6 +77,13 @@ function GameCard({ gameType, instances, onNavigate, userRole, showOffline }) {
 	const hasIp = instances.some((i) => i.joinAddress);
 	const hasPing = instances.some((i) => i.ping != null);
 	const hasPassword = instances.some((i) => i.serverPassword);
+
+	// Per-server CPU/RAM, keyed by server name — see serverResourceStats.js
+	// on the API side. Plain inline text for now; this is a stand-in ahead
+	// of a planned wider display overhaul, not a finished design.
+	const statsByName = {};
+	for (const s of serverStats || []) statsByName[s.name] = s;
+	const hasResourceStats = rows.some((i) => statsByName[i.name]?.running);
 
 	const clickable = userRole === "admin";
 
@@ -128,6 +142,9 @@ function GameCard({ gameType, instances, onNavigate, userRole, showOffline }) {
 							{hasPassword && (
 								<TableCell sx={{ color: grey[500] }}>Password</TableCell>
 							)}
+							{hasResourceStats && (
+								<TableCell sx={{ color: grey[500] }}>CPU / RAM</TableCell>
+							)}
 						</TableRow>
 					</TableHead>
 					<TableBody>
@@ -170,6 +187,13 @@ function GameCard({ gameType, instances, onNavigate, userRole, showOffline }) {
 										) : (
 											"—"
 										)}
+									</TableCell>
+								)}
+								{hasResourceStats && (
+									<TableCell>
+										{statsByName[srv.name]?.running
+											? `${statsByName[srv.name].cpuPercent}% / ${(statsByName[srv.name].ramMB / 1024).toFixed(1)} GB`
+											: "—"}
 									</TableCell>
 								)}
 							</TableRow>

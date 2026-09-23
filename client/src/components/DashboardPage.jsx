@@ -27,6 +27,7 @@ function groupByType(servers) {
 function DashboardPage({
 	servers,
 	systemStats,
+	serverStats,
 	loading,
 	onNavigate,
 	onCreateServer,
@@ -104,6 +105,7 @@ function DashboardPage({
 							onNavigate={onNavigate}
 							userRole={userRole}
 							showOffline={showOffline}
+							serverStats={serverStats}
 						/>
 					))}
 				</Box>
