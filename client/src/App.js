@@ -6,6 +6,7 @@ import {
 	CssBaseline,
 	Box,
 	Button,
+	alpha,
 } from "@mui/material";
 import { darkTheme } from "./theme";
 import DashboardPage from "./components/DashboardPage";
@@ -195,23 +196,26 @@ function App() {
 		};
 	}, []);
 
-	const navigateToConfig = (serverName) => {
+	// useCallback (not plain function expressions) since these thread all the
+	// way down into every ServerTile's onClick — a fresh reference every App
+	// render would defeat React.memo on GameCard/ServerTile further down.
+	const navigateToConfig = React.useCallback((serverName) => {
 		setSelectedServer(serverName);
 		setPage("config");
-	};
+	}, []);
 
-	const navigateToDashboard = () => {
+	const navigateToDashboard = React.useCallback(() => {
 		setSelectedServer(null);
 		setPage("dashboard");
-	};
+	}, []);
 
-	const navigateToBatchEditor = () => {
+	const navigateToBatchEditor = React.useCallback(() => {
 		setPage("batchEditor");
-	};
+	}, []);
 
-	const navigateToCreateServer = () => {
+	const navigateToCreateServer = React.useCallback(() => {
 		setPage("createServer");
-	};
+	}, []);
 
 	const selectedServerData = servers[selectedServer] || null;
 
@@ -237,12 +241,19 @@ function App() {
 			<Container sx={{ mt: { xs: 2, sm: 4 }, mb: { xs: 2, sm: 4 } }}>
 				<Box
 					sx={{
+						position: "sticky",
+						top: 0,
+						zIndex: (t) => t.zIndex.appBar,
 						display: "flex",
 						flexDirection: { xs: "column", sm: "row" },
 						justifyContent: "space-between",
 						alignItems: "center",
 						gap: 1,
 						mb: 2,
+						py: 1.5,
+						backdropFilter: "blur(8px)",
+						backgroundColor: (t) => alpha(t.palette.background.default, 0.85),
+						borderBottom: "1px solid rgba(255,255,255,0.08)",
 					}}
 				>
 					<Typography variant="h3" gutterBottom sx={{ mb: 0 }}>

@@ -23,7 +23,8 @@ function groupByType(servers) {
 	return groups;
 }
 
-// This component displays the main grid of game cards, each listing its server instances.
+// This component displays the main list of game sections, each collapsible
+// and listing its server instances.
 function DashboardPage({
 	servers,
 	systemStats,
@@ -35,11 +36,38 @@ function DashboardPage({
 	userRole,
 }) {
 	const [showOffline, setShowOffline] = React.useState(true);
+	// Only ever set by an explicit user click — see isGroupOpen below for how
+	// an unset entry's default is derived instead of stored, so newly-added
+	// game types and live online/offline changes are picked up for free.
+	const [openGroups, setOpenGroups] = React.useState({});
 
-	const groups = groupByType(servers);
+	// groupByType previously recomputed on every render, including
+	// systemStats/serverStats-only SSE ticks where `servers` itself hadn't
+	// changed at all. Memoizing it means those ticks return the exact same
+	// object/array references, which — combined with React.memo on GameCard —
+	// lets a systemStats-only tick skip re-rendering every card entirely.
+	const groups = React.useMemo(() => groupByType(servers), [servers]);
 	const gameTypes = Object.keys(groups).filter((type) =>
 		showOffline ? true : groups[type].some((s) => s.online),
 	);
+
+	// A group with any online instance defaults open (useful at a glance
+	// without a wall of expanded empty sections); fully-offline groups
+	// default closed. A manual toggle always wins once made.
+	const isGroupOpen = (type) =>
+		type in openGroups ? openGroups[type] : groups[type].some((s) => s.online);
+
+	const toggleGroup = (type) => {
+		setOpenGroups((prev) => ({ ...prev, [type]: !isGroupOpen(type) }));
+	};
+
+	const expandAll = () => {
+		setOpenGroups(Object.fromEntries(gameTypes.map((t) => [t, true])));
+	};
+
+	const collapseAll = () => {
+		setOpenGroups(Object.fromEntries(gameTypes.map((t) => [t, false])));
+	};
 
 	return (
 		<>
@@ -75,6 +103,12 @@ function DashboardPage({
 						Create Server
 					</Button>
 				)}
+				<Button size="small" onClick={expandAll}>
+					Expand All
+				</Button>
+				<Button size="small" onClick={collapseAll}>
+					Collapse All
+				</Button>
 				<FormControlLabel
 					control={
 						<Switch
@@ -89,14 +123,7 @@ function DashboardPage({
 			{loading ? (
 				<CircularProgress sx={{ display: "block", mx: "auto" }} />
 			) : (
-				<Box
-					sx={{
-						display: "grid",
-						gap: { xs: 2, sm: 3 },
-						gridTemplateColumns:
-							"repeat(auto-fit, minmax(min(460px, 100%), 1fr))",
-					}}
-				>
+				<Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 1.5, sm: 2 } }}>
 					{gameTypes.map((type) => (
 						<GameCard
 							key={type}
@@ -106,6 +133,8 @@ function DashboardPage({
 							userRole={userRole}
 							showOffline={showOffline}
 							serverStats={serverStats}
+							isOpen={isGroupOpen(type)}
+							onToggle={() => toggleGroup(type)}
 						/>
 					))}
 				</Box>

@@ -1,61 +1,15 @@
 import React from "react";
 import {
 	Box,
-	Card,
-	Table,
-	TableBody,
-	TableCell,
-	TableContainer,
-	TableHead,
-	TableRow,
+	Accordion,
+	AccordionSummary,
+	AccordionDetails,
 	Typography,
-	IconButton,
-	Tooltip,
+	Chip,
 } from "@mui/material";
-import { green, grey } from "@mui/material/colors";
-import { ContentCopy as ContentCopyIcon } from "@mui/icons-material";
+import { ExpandMore as ExpandMoreIcon } from "@mui/icons-material";
 import { getGameInfo } from "../gameCatalog";
-import { copyToClipboard } from "../utils/clipboard";
-
-function StatusDot({ online }) {
-	return (
-		<Box
-			component="span"
-			sx={{
-				display: "inline-block",
-				width: 8,
-				height: 8,
-				borderRadius: "50%",
-				backgroundColor: online ? green[500] : grey[600],
-				mr: 1.5,
-				flexShrink: 0,
-			}}
-		/>
-	);
-}
-
-function CopyableText({ text }) {
-	const [tooltip, setTooltip] = React.useState("Copy");
-
-	const handleCopy = (e) => {
-		e.stopPropagation();
-		copyToClipboard(text, setTooltip);
-		setTimeout(() => setTooltip("Copy"), 1500);
-	};
-
-	return (
-		<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-			<Typography variant="body2" component="span">
-				{text}
-			</Typography>
-			<Tooltip title={tooltip}>
-				<IconButton size="small" onClick={handleCopy}>
-					<ContentCopyIcon sx={{ fontSize: 14 }} />
-				</IconButton>
-			</Tooltip>
-		</Box>
-	);
-}
+import ServerTile from "./ServerTile";
 
 function GameCard({
 	gameType,
@@ -64,145 +18,134 @@ function GameCard({
 	userRole,
 	showOffline,
 	serverStats,
+	isOpen,
+	onToggle,
 }) {
 	const { title, banner, gradient } = getGameInfo(gameType);
 
-	const rows = showOffline
-		? instances
-		: instances.filter((i) => i.online);
+	const rows = React.useMemo(
+		() => (showOffline ? instances : instances.filter((i) => i.online)),
+		[instances, showOffline],
+	);
+
+	const statsByName = React.useMemo(() => {
+		const map = {};
+		for (const s of serverStats || []) map[s.name] = s;
+		return map;
+	}, [serverStats]);
+
+	const { onlineCount, totalPlayers } = React.useMemo(() => {
+		let online = 0;
+		let players = 0;
+		for (const i of instances) {
+			if (i.online) online += 1;
+			players += i.playerCount ?? 0;
+		}
+		return { onlineCount: online, totalPlayers: players };
+	}, [instances]);
 
 	if (rows.length === 0) return null;
-
-	const hasSession = instances.some((i) => i.sessionName);
-	const hasIp = instances.some((i) => i.joinAddress);
-	const hasPing = instances.some((i) => i.ping != null);
-	const hasPassword = instances.some((i) => i.serverPassword);
-
-	// Per-server CPU/RAM, keyed by server name — see serverResourceStats.js
-	// on the API side. Plain inline text for now; this is a stand-in ahead
-	// of a planned wider display overhaul, not a finished design.
-	const statsByName = {};
-	for (const s of serverStats || []) statsByName[s.name] = s;
-	const hasResourceStats = rows.some((i) => statsByName[i.name]?.running);
 
 	const clickable = userRole === "admin";
 
 	return (
-		<Card sx={{ overflow: "hidden" }}>
-			<Box
-				sx={{
-					position: "relative",
-					height: 180,
-					backgroundImage: banner
-						? `url(${banner})`
-						: gradient,
-					backgroundSize: "cover",
-					backgroundPosition: "center",
-				}}
+		<Accordion
+			expanded={isOpen}
+			onChange={onToggle}
+			disableGutters
+			elevation={0}
+			sx={{
+				transition: "box-shadow 0.2s ease",
+				"&:hover": { boxShadow: "0 4px 20px rgba(0,0,0,0.4)" },
+			}}
+		>
+			<AccordionSummary
+				expandIcon={
+					<ExpandMoreIcon
+						sx={{
+							color: "#fff",
+							bgcolor: "rgba(0,0,0,0.35)",
+							borderRadius: "50%",
+						}}
+					/>
+				}
+				sx={{ minHeight: 120, "&.Mui-expanded": { minHeight: 120 } }}
 			>
 				<Box
 					sx={{
-						position: "absolute",
-						inset: 0,
-						background:
-							"linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0) 100%)",
-					}}
-				/>
-				<Typography
-					variant="h5"
-					sx={{
-						position: "absolute",
-						left: 16,
-						bottom: 12,
-						color: "white",
-						fontWeight: 600,
-						textShadow: "0 1px 4px rgba(0,0,0,0.6)",
+						position: "relative",
+						height: 120,
+						width: "100%",
+						overflow: "hidden",
 					}}
 				>
-					{title}
-				</Typography>
-			</Box>
+					<Box
+						sx={{
+							position: "absolute",
+							inset: 0,
+							backgroundImage: banner ? `url(${banner})` : gradient,
+							backgroundSize: "cover",
+							backgroundPosition: "center",
+							transition: "transform 0.3s ease",
+							".MuiAccordion-root:hover &": {
+								transform: "scale(1.03)",
+							},
+						}}
+					/>
+					<Box
+						sx={{
+							position: "absolute",
+							inset: 0,
+							background:
+								"linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.15) 55%, rgba(0,0,0,0) 100%)",
+						}}
+					/>
+					<Typography
+						variant="h5"
+						sx={{
+							position: "absolute",
+							left: 16,
+							bottom: 12,
+							color: "white",
+							fontWeight: 600,
+							textShadow: "0 1px 4px rgba(0,0,0,0.6)",
+						}}
+					>
+						{title}
+					</Typography>
+					<Box sx={{ position: "absolute", right: 56, bottom: 12, display: "flex", gap: 1 }}>
+						<Chip
+							size="small"
+							label={`${onlineCount}/${instances.length} online`}
+							sx={{
+								bgcolor: onlineCount > 0 ? "rgba(46,125,50,0.85)" : "rgba(0,0,0,0.5)",
+								color: "white",
+							}}
+						/>
+						{totalPlayers > 0 && (
+							<Chip
+								size="small"
+								label={`${totalPlayers} players`}
+								sx={{ bgcolor: "rgba(0,0,0,0.5)", color: "white" }}
+							/>
+						)}
+					</Box>
+				</Box>
+			</AccordionSummary>
 
-			<TableContainer sx={{ overflowX: "auto" }}>
-				<Table
-					size="small"
-					sx={{ "& .MuiTableCell-root": { px: { xs: 1, sm: 2 } } }}
-				>
-					<TableHead>
-						<TableRow>
-							<TableCell sx={{ color: grey[500] }}>Name</TableCell>
-							{hasSession && (
-								<TableCell sx={{ color: grey[500] }}>Session</TableCell>
-							)}
-							{hasIp && <TableCell sx={{ color: grey[500] }}>IP</TableCell>}
-							<TableCell sx={{ color: grey[500] }}>Players</TableCell>
-							{hasPing && (
-								<TableCell sx={{ color: grey[500] }}>Ping</TableCell>
-							)}
-							{hasPassword && (
-								<TableCell sx={{ color: grey[500] }}>Password</TableCell>
-							)}
-							{hasResourceStats && (
-								<TableCell sx={{ color: grey[500] }}>CPU / RAM</TableCell>
-							)}
-						</TableRow>
-					</TableHead>
-					<TableBody>
-						{rows.map((srv) => (
-							<TableRow
-								key={srv.name}
-								hover={clickable}
-								onClick={
-									clickable ? () => onNavigate(srv.name) : undefined
-								}
-								sx={{
-									cursor: clickable ? "pointer" : "default",
-									opacity: srv.online ? 1 : 0.6,
-									"&:last-child td": { border: 0 },
-								}}
-							>
-								<TableCell>
-									<Box sx={{ display: "flex", alignItems: "center" }}>
-										<StatusDot online={srv.online} />
-										{srv.name}
-									</Box>
-								</TableCell>
-								{hasSession && (
-									<TableCell>{srv.sessionName || "—"}</TableCell>
-								)}
-								{hasIp && <TableCell>{srv.joinAddress || "—"}</TableCell>}
-								<TableCell>
-									{srv.playerCount ?? 0}
-									{srv.maxplayers ? ` / ${srv.maxplayers}` : ""}
-								</TableCell>
-								{hasPing && (
-									<TableCell>
-										{srv.online && srv.ping != null ? `${srv.ping} ms` : "—"}
-									</TableCell>
-								)}
-								{hasPassword && (
-									<TableCell>
-										{srv.serverPassword ? (
-											<CopyableText text={srv.serverPassword} />
-										) : (
-											"—"
-										)}
-									</TableCell>
-								)}
-								{hasResourceStats && (
-									<TableCell>
-										{statsByName[srv.name]?.running
-											? `${statsByName[srv.name].cpuPercent}% / ${(statsByName[srv.name].ramMB / 1024).toFixed(1)} GB`
-											: "—"}
-									</TableCell>
-								)}
-							</TableRow>
-						))}
-					</TableBody>
-				</Table>
-			</TableContainer>
-		</Card>
+			<AccordionDetails sx={{ p: 0 }}>
+				{rows.map((srv) => (
+					<ServerTile
+						key={srv.name}
+						srv={srv}
+						stats={statsByName[srv.name]}
+						clickable={clickable}
+						onClick={clickable ? () => onNavigate(srv.name) : undefined}
+					/>
+				))}
+			</AccordionDetails>
+		</Accordion>
 	);
 }
 
-export default GameCard;
+export default React.memo(GameCard);
